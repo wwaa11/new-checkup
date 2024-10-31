@@ -1,0 +1,9 @@
+@extends('station.layouts.app')
+@section('station')
+    Select
+@endsection
+@section('body')
+    <div>
+        <div>asd</div>
+    </div>
+@endsection
