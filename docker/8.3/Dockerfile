@@ -52,6 +52,26 @@ RUN apt-get update \
     curl \
     gnupg
 
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc \
+    && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update
+
+RUN ACCEPT_EULA=Y apt-get install -y msodbcsql17 odbcinst=2.3.7 odbcinst1debian2=2.3.7 unixodbc-dev=2.3.7 unixodbc=2.3.7
+
+RUN pecl install sqlsrv \
+    && pecl install pdo_sqlsrv \
+    && echo "extension=sqlsrv.so" > /etc/php/8.3/mods-available/sqlsrv.ini \
+    && echo "extension=pdo_sqlsrv.so" > /etc/php/8.3/mods-available/pdo_sqlsrv.ini \
+    && phpenmod -v 8.3 sqlsrv pdo_sqlsrv \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN apt-get update -yqq \
+    && apt-get install -y --no-install-recommends openssl \ 
+    && sed -i 's,^\(MinProtocol[ ]*=\).*,\1'TLSv1.0',g' /etc/ssl/openssl.cnf \
+    && sed -i 's,^\(CipherString[ ]*=\).*,\1'DEFAULT@SECLEVEL=0',g' /etc/ssl/openssl.cnf\
+    && rm -rf /var/lib/apt/lists/*
+
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.3
 
 RUN groupadd --force -g $WWWGROUP sail
