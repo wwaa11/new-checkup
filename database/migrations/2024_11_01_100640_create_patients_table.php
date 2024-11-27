@@ -10,28 +10,44 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
-            $table->date('visitdate');
+            $table->string('request_input')->nullable();
+            $table->date('date');
+            $table->string('hn');
             $table->string('name');
             $table->enum('lang',['th','en']);
-            $table->string('hn');
-            $table->string('vn')->nullable();
+            $table->string('app')->nullable();
+            $table->time('app_time')->nullable();
             $table->string('pre_vn')->nullable();
-            $table->boolean('finish')->default(false);
-            $table->json('logs');
+            $table->boolean('pre_vn_finish')->default(false);
+            $table->string('vn')->nullable();
             $table->timestamps();
         });
 
         Schema::create('patienttasks', function (Blueprint $table) {
             $table->id();
             $table->integer('patient_id');
+            $table->date('date');
+            $table->string('hn');
             $table->string('code');
-            $table->dateTime('call');
-            $table->dateTime('success');
-            $table->text('memo1')->nullable();
-            $table->text('memo2')->nullable();
-            $table->text('memo3')->nullable();
+            $table->enum('type',['process','wait','work','success'])->default('process');
+            $table->dateTime('assign')->nullable();
+            $table->dateTime('call')->nullable();
+            $table->dateTime('success')->nullable();
+            $table->string('memo1')->nullable();
+            $table->string('memo2')->nullable();
+            $table->string('memo3')->nullable();
             $table->text('memo4')->nullable();
-            $table->text('memo5')->nullable();
+            $table->integer('memo5')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('patientlogs', function (Blueprint $table) {
+            $table->id();
+            $table->integer('patient_id');
+            $table->date('date');
+            $table->string('hn');
+            $table->string('text');
+            $table->string('user');
             $table->timestamps();
         });
     }
@@ -40,5 +56,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('patients');
         Schema::dropIfExists('patienttasks');
+        Schema::dropIfExists('patientlogs');
     }
 };

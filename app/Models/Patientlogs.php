@@ -6,7 +6,7 @@ use App\Models\Patient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Patienttask extends Model
+class Patientlogs extends Model
 {
     //
 

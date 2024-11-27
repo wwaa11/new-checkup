@@ -72,7 +72,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach( $arrStation as $data ) {
-            $station = new Station([ 'code' => $data['code'], 'name' => $data['name'],'wait' => '[]' , 'hold' => '[]']);
+            $station = new Station([ 'code' => $data['code'], 'name' => $data['name']]);
             $station->save();
             for ($i=1; $i <= $data['station']; $i++) { 
                 $substation = new Substation(['station_id' => $station->id, 'name' => $station->name.' ห้อง '. $i,]);

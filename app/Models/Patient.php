@@ -12,13 +12,10 @@ class Patient extends Model
 
     public function tasks(): HasMany
     {
-        return $this->HasMany(Patienttask::class);
+        return $this->HasMany(Patienttask::class, "patient_id", "id");
     }
-
-    protected function casts(): array
+    public function logs(): HasMany
     {
-        return [
-            'logs' => 'object',
-        ];
+        return $this->HasMany(Patientlogs::class, "patient_id", "id");
     }
 }

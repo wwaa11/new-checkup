@@ -20,11 +20,4 @@ class Station extends Model
     {
         return $this->HasMany(Substation::class);
     }
-    protected function casts(): array
-    {
-        return [
-            'wait' => 'object',
-            'hold' => 'object',
-        ];
-    }
 }
