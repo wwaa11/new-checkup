@@ -25,6 +25,9 @@
             <li class="ps-12 p-3">
                 <a href="{{ env('APP_URL') }}/station">Select Station</a>
             </li>
+            <li class="ps-12 p-3">
+                <a href="{{ env('APP_URL') }}/history?input=null&date=today">History</a>
+            </li>
             {{-- <li class="ps-12 p-3">
                 <a href="{{ env('APP_URL') }}/verify">Request Number</a>
             </li> --}}

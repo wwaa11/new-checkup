@@ -140,7 +140,7 @@ class StationController extends Controller
                 $newPatientLog->patient_id = $patient->id;
                 $newPatientLog->date = date('Y-m-d');
                 $newPatientLog->hn = $ssbInfo->HN;
-                $newPatientLog->text = 'new Patient form Register';
+                $newPatientLog->text = 'ลงทะเบียนข้อมูลผู้ป่วยใหม่ นอกเหนือจาก NewUI';
                 $newPatientLog->user = Auth::user()->userid;
                 $newPatientLog->save();
             }else{
@@ -167,7 +167,7 @@ class StationController extends Controller
         $newPatientLog->patient_id = $patient->id;
         $newPatientLog->date = date('Y-m-d');
         $newPatientLog->hn = $patient->hn;
-        $newPatientLog->text = 'register manual '.$station->name;
+        $newPatientLog->text = 'ลงทะเบียนคิวที่ : '.$station->name;
         $newPatientLog->user = Auth::user()->userid;
         $newPatientLog->save();
 
@@ -240,7 +240,7 @@ class StationController extends Controller
             $newPatientLog->patient_id = $now_task->patient->id;
             $newPatientLog->date = date('Y-m-d');
             $newPatientLog->hn = $now_task->patient->hn;
-            $newPatientLog->text = 'hold '. $substation->name;
+            $newPatientLog->text = 'ปรับคิวไปยัง Waiting ที่ : '. $substation->name;
             $newPatientLog->user = Auth::user()->userid;
             $newPatientLog->save();
         }
@@ -272,7 +272,7 @@ class StationController extends Controller
             $newPatientLog->patient_id = $task->patient->id;
             $newPatientLog->date = date('Y-m-d');
             $newPatientLog->hn = $task->patient->hn;
-            $newPatientLog->text = 'call '. $substation->name;
+            $newPatientLog->text = 'เรียกคิวที่ : '. $substation->name;
             $newPatientLog->user = Auth::user()->userid;
             $newPatientLog->save();
         }
@@ -301,7 +301,7 @@ class StationController extends Controller
         $newPatientLog->patient_id = $task->patient->id;
         $newPatientLog->date = date('Y-m-d');
         $newPatientLog->hn = $task->patient->hn;
-        $newPatientLog->text = 'hold '. $substation->name;
+        $newPatientLog->text = 'ปรับคิวไปยัง Waiting ที่ : '. $substation->name;
         $newPatientLog->user = Auth::user()->userid;
         $newPatientLog->save();
 
@@ -326,7 +326,7 @@ class StationController extends Controller
         $newPatientLog->patient_id = $task->patient->id;
         $newPatientLog->date = date('Y-m-d');
         $newPatientLog->hn = $task->patient->hn;
-        $newPatientLog->text = 'success '. $substation->name;
+        $newPatientLog->text = 'สำเร็จรายการที่ : '. $substation->name;
         $newPatientLog->user = Auth::user()->userid;
         $newPatientLog->save();
 
@@ -344,7 +344,7 @@ class StationController extends Controller
                 $newPatientLog->patient_id = $task->patient->id;
                 $newPatientLog->date = date('Y-m-d');
                 $newPatientLog->hn = $task->patient->hn;
-                $newPatientLog->text = 'assign '. $substation->name;
+                $newPatientLog->text = 'ลงทะเบียนคิวที่ : ห้องเจาะเลือด';
                 $newPatientLog->user = Auth::user()->userid;
                 $newPatientLog->save();
             }
@@ -368,7 +368,7 @@ class StationController extends Controller
         $newPatientLog->patient_id = $task->patient->id;
         $newPatientLog->date = date('Y-m-d');
         $newPatientLog->hn = $task->patient->hn;
-        $newPatientLog->text = 'delete '. $substation->name;
+        $newPatientLog->text = 'ลบคิวที่ : '. $substation->name;
         $newPatientLog->user = Auth::user()->userid;
         $newPatientLog->save();
 
@@ -423,7 +423,7 @@ class StationController extends Controller
             $newPatientLog->patient_id = $task->patient->id;
             $newPatientLog->date = date('Y-m-d');
             $newPatientLog->hn = $task->patient->hn;
-            $newPatientLog->text = 'success '. $code;
+            $newPatientLog->text = 'สำเร็จรายการที่ : '. $code;
             $newPatientLog->user = Auth::user()->userid;
             $newPatientLog->save();
 
@@ -441,7 +441,7 @@ class StationController extends Controller
                     $newPatientLog->patient_id = $task->patient->id;
                     $newPatientLog->date = date('Y-m-d');
                     $newPatientLog->hn = $task->patient->hn;
-                    $newPatientLog->text = 'assign '. $substation->name;
+                    $newPatientLog->text = 'ลงทะเบียนคิวที่ : '. $substation->name;
                     $newPatientLog->user = Auth::user()->userid;
                     $newPatientLog->save();
                 }
@@ -451,5 +451,19 @@ class StationController extends Controller
         }
 
         return response()->json(['status' => 'unsuccess'], 200);
+    }
+    function history(Request $request){
+        $date = ($request->date == 'today') ? date('Y-m-d') : $request->date;
+        
+        if($request->input !== 'null'){
+            $patient = Patient::whereDate('date', $date)
+                ->where('hn', $request->input)
+                ->orwhere('vn', $request->input)
+                ->first();
+        }else{
+            $patient = null;
+        }
+        
+        return view('station.history')->with(compact('patient'));
     }
 }

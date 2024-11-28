@@ -74,7 +74,7 @@ class ProcessCreateTask implements ShouldQueue
                         $newPatientLog->patient_id = $patient->id;
                         $newPatientLog->date = date('Y-m-d');
                         $newPatientLog->hn = $data->HN;
-                        $newPatientLog->text = 'new Patient form NewUI';
+                        $newPatientLog->text = 'นำเข้าขูลผู้ป่วยจาก NewUI';
                         $newPatientLog->user = 'service';
                         $newPatientLog->save();
                     }else{
@@ -88,7 +88,7 @@ class ProcessCreateTask implements ShouldQueue
                             $newPatientLog->patient_id = $patient->id;
                             $newPatientLog->date = date('Y-m-d');
                             $newPatientLog->hn = $data->HN;
-                            $newPatientLog->text = 'add VN form NewUI';
+                            $newPatientLog->text = 'เพิ่มข้อมูล VN จาก NewUI';
                             $newPatientLog->user = 'service';
                             $newPatientLog->save();
                         }else{
@@ -102,6 +102,15 @@ class ProcessCreateTask implements ShouldQueue
                             break;
                         case '011':
                             $code = 'b12_lab';
+                            break;
+                            case '02':
+                        $code = 'b12_ekg';
+                            break;
+                        case '03':
+                            $code = 'b12_abi';
+                            break;
+                        case '04':
+                            $code = 'b12_estecho';
                             break;
                         case '06':
                             $code = 'b12_chest';
@@ -145,9 +154,19 @@ class ProcessCreateTask implements ShouldQueue
                             $newPatientLog->patient_id = $patient->id;
                             $newPatientLog->date = date('Y-m-d');
                             $newPatientLog->hn = $data->HN;
-                            $newPatientLog->text = 'add Task '.$code;
+                            $newPatientLog->text = 'สร้างรายการ Check UP '.$code;
                             $newPatientLog->user = 'service';
                             $newPatientLog->save();
+
+                            if($code == 'b12_vitalsign'){
+                                $newPatientLog = new Patientlogs;
+                                $newPatientLog->patient_id = $patient->id;
+                                $newPatientLog->date = date('Y-m-d');
+                                $newPatientLog->hn = $data->HN;
+                                $newPatientLog->text = 'ลงทะเบียนคิวที่ : วัดความดัน';
+                                $newPatientLog->user = 'service';
+                                $newPatientLog->save();
+                            }
                         }
                     }
                 }

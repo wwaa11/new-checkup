@@ -21,6 +21,8 @@ Route::middleware([pr9Auth::class])->group(function () {
     Route::get('/verify', [PatientController::class, 'verify']);
     Route::post('/verify', [PatientController::class, 'verifySearch']);
     
+    Route::get('/history', [StationController::class, 'history']);
+    
     Route::get('/station', [StationController::class, 'StationIndex']);
     Route::get('/station/{substation}', [StationController::class, 'Substation']);
     

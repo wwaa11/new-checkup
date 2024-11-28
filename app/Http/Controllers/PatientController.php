@@ -219,7 +219,7 @@ class PatientController extends Controller
                 $newPatientLog = new Patientlogs;
                 $newPatientLog->date = date('Y-m-d');
                 $newPatientLog->hn =  $request->hn;
-                $newPatientLog->text = 'Request generate ' . $outputNumber . ' for : '. $request->app_time;
+                $newPatientLog->text = 'ลงทะเบียนรับ PreVN : ' . $outputNumber . ' เวลานัด : '. $request->app_time;
                 $newPatientLog->save();
 
                 $newPatientTask = new Patienttask;
@@ -259,7 +259,7 @@ class PatientController extends Controller
                 $newPatientLog = new Patientlogs;
                 $newPatientLog->date = date('Y-m-d');
                 $newPatientLog->hn = $request->hn;
-                $newPatientLog->text = 'add Task b12_register';
+                $newPatientLog->text = 'ลงทะเบียนคิว Register : '.$outputNumber;
                 $newPatientLog->save();
 
                 $newPatientTask->save();

@@ -93,7 +93,7 @@
                 if ('{{ $patient->enabled }}' == 1) {
                     setTimeout(function() {
                         checksuccess();
-                    }, 1000 * 1);
+                    }, 1000 * 30);
                 }
             }
         });
