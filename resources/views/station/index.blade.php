@@ -4,12 +4,14 @@
 @endsection
 @section('body')
     <div class="p-6">
-        <div class="grid grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 gap-3">
             @foreach ($stations as $key => $station)
                 <div class="shadow-md p-6 font-bold">
                     <div class="text-center w-full text-2xl p-3">{{ $key }}</div>
                     @if ($key !== 'Register')
-                        <div class="p-3 text-center rounded-md border-2 mb-3 border-yellow-300">Register</div>
+                        <a href="{{ env('APP_URL') }}/station/register/{{ $station[0]['station_id'] }}">
+                            <div class="p-3 text-center rounded-md border-2 mb-3 border-yellow-300">Register</div>
+                        </a>
                     @endif
                     <div class="grid @if (count($station) > 1) grid-cols-2 @endif gap-3">
                         @foreach ($station as $sub)

@@ -62,10 +62,13 @@ class StationController extends Controller
         $stations = [];
         $substations = Substation::all();
         foreach ($substations as $subst) {
-            $stations[$subst->station->name][] = [
-                'id'=> $subst->id,
-                'name'=> $subst->name
-            ];
+            if($subst->station->code == 'b12_vitalsign' || $subst->station->code == 'b12_lab'){
+                $stations[$subst->station->name][] = [
+                    'station_id' => $subst->station->id,
+                    'id'=> $subst->id,
+                    'name'=> $subst->name,
+                ];
+            }
         }
         
         return view('station.index', ['stations' => $stations]);
@@ -74,12 +77,101 @@ class StationController extends Controller
     {
         $substation = Substation::find($id);
         if($substation->now !== null){
-            $patient = Patient::where('date', date('Y-m-d'))->where('hn', $substation->now)->first();
+            $patient = Patient::where('date', date('Y-m-d'))
+                ->where('hn', $substation->now)
+                ->first();
+            if($patient == null){
+                $substation->now = null;
+                $substation->save()
+                ;
+                $patient = (object)[
+                    'enabled' => 0
+                ];
+            }else{
+                $patient->enabled = 1;
+            }
         }else{
-            $patient = false;
+            $patient = (object)[
+                'enabled' => 0
+            ];
         }
 
         return view('station.substation')->with(compact('substation','patient'));
+    }
+    function Register($id)
+    {
+        $station = Station::find($id);
+
+        return view('station.register')->with(compact('station'));
+    }
+    function registerTask(Request $request)
+    {
+        $hn = $request->hn;
+        $station = Station::find($request->station_id);
+
+        $patient = Patient::whereDate('date', date('Y-m-d'))
+            ->where('hn', $hn)
+            ->first();
+
+        if($patient == null){
+            $ssbVN = DB::connection('SSB')
+                ->table('HNOPD_MASTER')
+                ->whereDate('VisitDate', date('Y-m-d'))
+                ->where('HN', $hn)
+                ->select('VisitDate', 'VN', 'HN', )
+                ->first();
+            if($ssbVN !== null){
+                $ssbInfo = DB::connection('SSB')
+                    ->table('HNPAT_INFO')
+                    ->join('HNPAT_NAME', 'HNPAT_INFO.HN','HNPAT_NAME.HN')
+                    ->where('HNPAT_INFO.HN', $ssbVN->HN)
+                    ->orderBy('HNPAT_NAME.SuffixSmall', 'asc')
+                    ->first();
+
+                $patient = new Patient;
+                $patient->date = date('Y-m-d');
+                $patient->hn = $ssbInfo->HN;
+                $patient->name = mb_substr($ssbInfo->FirstName,1).' '.mb_substr($ssbInfo->LastName,1);
+                $patient->lang = ($ssbInfo->NationalityCode == 'THA') ? 'th' : 'en';
+                $patient->vn = $ssbVN->VN;
+                $patient->save();
+
+                $newPatientLog = new Patientlogs;
+                $newPatientLog->patient_id = $patient->id;
+                $newPatientLog->date = date('Y-m-d');
+                $newPatientLog->hn = $ssbInfo->HN;
+                $newPatientLog->text = 'new Patient form Register';
+                $newPatientLog->user = Auth::user()->userid;
+                $newPatientLog->save();
+            }else{
+                return response()->json(['status'=>'unsuccess', 'text' => 'VN not found!'],200);
+            }
+        }
+
+        $task = Patienttask::whereDate('date', date('Y-m-d'))
+            ->where('code', $station->code)
+            ->where('hn', $patient->hn)
+            ->first();
+        if($task == null){
+            $task = new Patienttask;
+            $task->patient_id = $patient->id;
+            $task->date = date('Y-m-d');
+            $task->hn = $patient->hn;
+            $task->code = $station->code;
+        }
+        $task->type = 'process';
+        $task->assign = date('Y-m-d H:i:s');
+        $task->save();
+
+        $newPatientLog = new Patientlogs;
+        $newPatientLog->patient_id = $patient->id;
+        $newPatientLog->date = date('Y-m-d');
+        $newPatientLog->hn = $patient->hn;
+        $newPatientLog->text = 'register manual '.$station->name;
+        $newPatientLog->user = Auth::user()->userid;
+        $newPatientLog->save();
+
+        return response()->json(['status'=>'success'],200);
     }
     function getTask(Request $request)
     {
@@ -133,22 +225,21 @@ class StationController extends Controller
     {
         $substation = Substation::find($request->substation_id);
         if($substation->now !== null){
-            $task = Patienttask::whereDate('date', date('Y-m-d'))
+            $now_task = Patienttask::whereDate('date', date('Y-m-d'))
+                ->where('hn', $substation->now)
                 ->where('code', $substation->station->code)
-                ->orderBy('assign','asc')
                 ->first();
-            $task->type = 'wait';
-            $task->assign = date('Y-m-d H:i:s');
-            $task->call = null;
-            $task->memo4 = 'เรียกคิวอื่นโดยไม่ได้กด Hold';
-            $task->save();
 
-            $patient = Patient::whereDate('date', date('Y-m-d'))->where('hn', $substation->now)->first();
+            $now_task->type = 'wait';
+            $now_task->assign = date('Y-m-d H:i:s');
+            $now_task->call = null;
+            $now_task->memo4 = 'เรียกคิวอื่นโดยไม่ได้กด Hold';
+            $now_task->save();
 
             $newPatientLog = new Patientlogs;
-            $newPatientLog->patient_id = $patient->id;
+            $newPatientLog->patient_id = $now_task->patient->id;
             $newPatientLog->date = date('Y-m-d');
-            $newPatientLog->hn = $patient->hn;
+            $newPatientLog->hn = $now_task->patient->hn;
             $newPatientLog->text = 'hold '. $substation->name;
             $newPatientLog->user = Auth::user()->userid;
             $newPatientLog->save();
@@ -158,45 +249,207 @@ class StationController extends Controller
             $task = Patienttask::whereDate('date', date('Y-m-d'))
                 ->where('code', $substation->station->code)
                 ->where('hn', $type)
+                ->whereNotNull('assign')
                 ->orderBy('assign','asc')
                 ->first();
         }else{
             $task = Patienttask::whereDate('date', date('Y-m-d'))
                 ->where('code', $substation->station->code)
+                ->where('type' , 'process')
+                ->whereNotNull('assign')
                 ->orderBy('assign','asc')
                 ->first();
         }
-        $task->type = 'work';
-        $task->call = date('Y-m-d H:i:s');
-        $task->save();
+        if($task !== null){
+            $task->type = 'work';
+            $task->call = date('Y-m-d H:i:s');
+            $task->save();
 
-        $substation->now = $task->hn;
-        $substation->save();
+            $substation->now = $task->hn;
+            $substation->save();
 
-        $patient = Patient::whereDate('date', date('Y-m-d'))->where('hn', $task->hn)->first();
-
-        $newPatientLog = new Patientlogs;
-        $newPatientLog->patient_id = $patient->id;
-        $newPatientLog->date = date('Y-m-d');
-        $newPatientLog->hn = $patient->hn;
-        $newPatientLog->text = 'call '. $substation->name;
-        $newPatientLog->user = Auth::user()->userid;
-        $newPatientLog->save();
+            $newPatientLog = new Patientlogs;
+            $newPatientLog->patient_id = $task->patient->id;
+            $newPatientLog->date = date('Y-m-d');
+            $newPatientLog->hn = $task->patient->hn;
+            $newPatientLog->text = 'call '. $substation->name;
+            $newPatientLog->user = Auth::user()->userid;
+            $newPatientLog->save();
+        }
         
-        response()->json(['status' => 'success'], 200);
+        return response()->json(['status' => 'success'], 200);
     }
     function holdTask(Request $request)
     {
         $substation = Substation::find($request->substation_id);
-        
-        
+        if($substation->now == $request->hn){
+            $substation->now = null;
+            $substation->save();
+        }
+        $task = Patienttask::whereDate('date', date('Y-m-d'))
+            ->where('hn', $request->hn)
+            ->where('code', $substation->station->code)
+            ->first();
+
+        $task->type = 'wait';
+        $task->assign = date('Y-m-d H:i:s');
+        $task->call = null;
+        $task->memo4 = $request->reason;
+        $task->save();
+
+        $newPatientLog = new Patientlogs;
+        $newPatientLog->patient_id = $task->patient->id;
+        $newPatientLog->date = date('Y-m-d');
+        $newPatientLog->hn = $task->patient->hn;
+        $newPatientLog->text = 'hold '. $substation->name;
+        $newPatientLog->user = Auth::user()->userid;
+        $newPatientLog->save();
+
+        return response()->json(['status' => 'success'], 200);
     }
     function successTask(Request $request)
     {
+        $substation = Substation::find($request->substation_id);
+        $substation->now = null;
+        $substation->save();
 
+        $task = Patienttask::whereDate('date', date('Y-m-d'))
+            ->where('hn', $request->hn)
+            ->where('code', $substation->station->code)
+            ->first();
+
+        $task->type = 'success';
+        $task->success = date('Y-m-d H:i:s');
+        $task->save();
+
+        $newPatientLog = new Patientlogs;
+        $newPatientLog->patient_id = $task->patient->id;
+        $newPatientLog->date = date('Y-m-d');
+        $newPatientLog->hn = $task->patient->hn;
+        $newPatientLog->text = 'success '. $substation->name;
+        $newPatientLog->user = Auth::user()->userid;
+        $newPatientLog->save();
+
+        if($substation->station->code == 'b12_vitalsign'){
+            $task = Patienttask::whereDate('date', date('Y-m-d'))
+                ->where('hn', $request->hn)
+                ->where('code', 'b12_lab')
+                ->first();
+
+            if($task !== null){
+                $task->assign = date('Y-m-d H:i:s');
+                $task->save();
+
+                $newPatientLog = new Patientlogs;
+                $newPatientLog->patient_id = $task->patient->id;
+                $newPatientLog->date = date('Y-m-d');
+                $newPatientLog->hn = $task->patient->hn;
+                $newPatientLog->text = 'assign '. $substation->name;
+                $newPatientLog->user = Auth::user()->userid;
+                $newPatientLog->save();
+            }
+        }
+
+        return response()->json(['status' => 'success'], 200);
     }
     function deleteTask(Request $request)
     {
+        $substation = Substation::find($request->substation_id);
+        $task = Patienttask::whereDate('date', date('Y-m-d'))
+            ->where('hn', $request->hn)
+            ->where('code', $substation->station->code)
+            ->first();
 
+        $task->type = 'success';
+        $task->success = date('Y-m-d H:i:s');
+        $task->save();
+
+        $newPatientLog = new Patientlogs;
+        $newPatientLog->patient_id = $task->patient->id;
+        $newPatientLog->date = date('Y-m-d');
+        $newPatientLog->hn = $task->patient->hn;
+        $newPatientLog->text = 'delete '. $substation->name;
+        $newPatientLog->user = Auth::user()->userid;
+        $newPatientLog->save();
+
+        return response()->json(['status' => 'success'], 200);
+    }
+    function checksuccessTask(Request $request)
+    {
+        $code = $request->code;
+        $isSuccess = false;
+        if($request->code == 'b12_vitalsign'){
+            $getVS = DB::connection('SSB')
+                ->table("HNOPD_VITALSIGN")
+                ->whereDate('VisitDate', date('Y-m-d'))
+                ->where('VN', $request->vn)
+                ->first();
+
+            if($getVS !== null){
+                $isSuccess = true;
+            }
+        }else if($request->code == 'b12_lab'){
+            $getLabReq = DB::connection('NewUI')
+                ->table("HIS_CHECKUP_STATION_DETAIL")
+                ->whereDate('VisitDate', date('Y-m-d'))
+                ->where('VN', $request->vn)
+                ->where('StationCode', '011')
+                ->first();
+
+            $blood = DB::connection('SSB')
+                ->table('HNLABREQ_HEADER')
+                ->where('RequestNo', $getLabReq->FacilityRequestNo)
+                ->first();
+
+            if($blood !== null && $blood->SpecimenReceiveDateTime !== null){
+                $isSuccess = true;
+            }
+        }
+
+        if($isSuccess){
+            $substation = Substation::find($request->substation_id);
+            $substation->now = null;
+            $substation->save();
+
+            $task = Patienttask::whereDate('date', date('Y-m-d'))
+                ->where('hn', $request->hn)
+                ->where('code', $code)
+                ->first();
+            $task->type = 'success';
+            $task->success = date('Y-m-d H:i:s');
+            $task->save();
+
+            $newPatientLog = new Patientlogs;
+            $newPatientLog->patient_id = $task->patient->id;
+            $newPatientLog->date = date('Y-m-d');
+            $newPatientLog->hn = $task->patient->hn;
+            $newPatientLog->text = 'success '. $code;
+            $newPatientLog->user = Auth::user()->userid;
+            $newPatientLog->save();
+
+            if($substation->station->code == 'b12_vitalsign'){
+                $task = Patienttask::whereDate('date', date('Y-m-d'))
+                    ->where('hn', $request->hn)
+                    ->where('code', 'b12_lab')
+                    ->first();
+    
+                if($task !== null){
+                    $task->assign = date('Y-m-d H:i:s');
+                    $task->save();
+    
+                    $newPatientLog = new Patientlogs;
+                    $newPatientLog->patient_id = $task->patient->id;
+                    $newPatientLog->date = date('Y-m-d');
+                    $newPatientLog->hn = $task->patient->hn;
+                    $newPatientLog->text = 'assign '. $substation->name;
+                    $newPatientLog->user = Auth::user()->userid;
+                    $newPatientLog->save();
+                }
+            }
+
+            return response()->json(['status' => 'success'], 200);
+        }
+
+        return response()->json(['status' => 'unsuccess'], 200);
     }
 }

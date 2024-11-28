@@ -6,22 +6,29 @@
     <div class="p-6">
         <div class="flex px-6 gap-3">
             <div class="flex-shrink p-3 font-bold text-2xl text-gray-600">{{ $substation->name }}</div>
-            <div class="flex-grow p-3 font-bold text-2xl text-blue-600 text-center shadow bg-gray-100">
-                @if ($patient)
-                    <div class="grid grid-cols-2 w-full">
-                        <div>VN: {{ $patient->vn }}</div>
-                        <div>HN: {{ $patient->hn }}</div>
+            <div class="flex-grow p-3 font-bold text-2xl shadow bg-gray-100">
+                @if ($patient->enabled)
+                    <div class="grid grid-cols-2 w-full gap-3 text-gray-600">
+                        <div class="text-end">VN: <span class="text-red-600" id="vn">{{ $patient->vn }}</span></div>
+                        <div>Name: <span class="text-blue-600">{{ $patient->name }}</span> ( <span class="text-blue-600"
+                                id="hn">{{ $patient->hn }}</span> )</div>
                     </div>
-                    <div>{{ $patient->name }}</div>
                 @endif
             </div>
             <div class="flex-shrink gap-3 flex">
-                <button class="p-3 rounded border w-24 border-blue-500 text-blue-500" type="button"
-                    onclick="CallFn()">Call</button>
-                <button class="p-3 rounded border w-24 border-amber-500 text-amber-500" type="button"
-                    onclick="HoldFn()">Hold</button>
-                <button class="p-3 rounded border w-24 border-green-600 text-green-600" type="button"
-                    onclick="SuccessFn()">Success</button>
+                <button class="p-3 rounded border w-24 border-blue-500 text-blue-500" type="button" onclick="CallFn()">
+                    Call
+                </button>
+                @if ($patient->enabled)
+                    <button class="p-3 rounded border w-24 border-amber-500 text-amber-500" type="button"
+                        onclick="HoldFn('{{ $patient->hn }}')">
+                        Hold
+                    </button>
+                    <button class="p-3 rounded border w-24 border-green-600 text-green-600" type="button"
+                        onclick="SuccessFn('{{ $patient->hn }}')">
+                        Success
+                    </button>
+                @endif
             </div>
         </div>
         <div class="w-full p-6">
@@ -81,7 +88,35 @@
             getTask('process')
             getTask('wait')
             getAllTask()
+            if ('{{ $substation->station->code }}' == 'b12_vitalsign' ||
+                '{{ $substation->station->code }}' == 'b12_lab') {
+                if ('{{ $patient->enabled }}' == 1) {
+                    setTimeout(function() {
+                        checksuccess();
+                    }, 1000 * 1);
+                }
+            }
         });
+
+        async function checksuccess() {
+            const formData = new FormData();
+            formData.append('hn', $('#hn').html());
+            formData.append('vn', $('#vn').html());
+            formData.append('code', '{{ $substation->station->code }}');
+            formData.append('substation_id', '{{ $substation->id }}');
+            await axios.post("{{ env('APP_URL') }}/station/checksuccess", formData).then((res) => {
+                console.log(res.data.status)
+                if (res.data.status == 'success') {
+                    location.reload();
+                } else {
+                    console.log(res)
+                    setTimeout(function() {
+                        checksuccess();
+                    }, 1000 * 10);
+                }
+            })
+        }
+
         async function getTask(type) {
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
@@ -129,8 +164,8 @@
             })
 
             setTimeout(function() {
-                // getTask(type)
-            }, 1000 * 5);
+                getTask(type)
+            }, 1000 * 10);
         }
 
         async function getAllTask() {
@@ -152,12 +187,28 @@
 
             setTimeout(function() {
                 getAllTask()
-            }, 1000 * 5);
+            }, 1000 * 30);
         }
 
         async function SuccessFn(hn) {
-            console.log('Suc : ' + hn)
+            const alert = await Swal.fire({
+                icon: 'info',
+                title: 'Success Confirm : ' + hn,
+                confirmButtonColor: 'green',
+                confirmButtonText: 'SUCCESS!',
+                showCancelButton: true,
+            })
+
+            if (alert.isConfirmed) {
+                const formData = new FormData();
+                formData.append('substation_id', '{{ $substation->id }}');
+                formData.append('hn', hn);
+                await axios.post("{{ env('APP_URL') }}/station/success", formData).then((res) => {
+                    location.reload();
+                })
+            }
         }
+
         async function CallFn(hn) {
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
@@ -166,6 +217,7 @@
                 location.reload();
             })
         }
+
         async function HoldFn(hn) {
             const {
                 value: reason
@@ -194,8 +246,24 @@
             }
 
         }
+
         async function DeleteFn(hn) {
-            console.log('del : ' + hn)
+            const alert = await Swal.fire({
+                icon: 'warning',
+                title: 'Delete Confirm : ' + hn,
+                confirmButtonColor: 'red',
+                confirmButtonText: 'Delete!',
+                showCancelButton: true,
+            })
+
+            if (alert.isConfirmed) {
+                const formData = new FormData();
+                formData.append('substation_id', '{{ $substation->id }}');
+                formData.append('hn', hn);
+                await axios.post("{{ env('APP_URL') }}/station/delete", formData).then((res) => {
+                    location.reload();
+                })
+            }
         }
     </script>
 @endsection

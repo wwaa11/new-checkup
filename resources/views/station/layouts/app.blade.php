@@ -25,9 +25,9 @@
             <li class="ps-12 p-3">
                 <a href="{{ env('APP_URL') }}/station">Select Station</a>
             </li>
-            <li class="ps-12 p-3">
+            {{-- <li class="ps-12 p-3">
                 <a href="{{ env('APP_URL') }}/verify">Request Number</a>
-            </li>
+            </li> --}}
         </ul>
         <div class="flex-shrink p-3 font-bold text-red-600 cursor-pointer" onclick="logoutFn()">
             {{ auth()->user()->name }} ({{ auth()->user()->userid }})
