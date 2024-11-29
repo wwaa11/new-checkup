@@ -21,11 +21,11 @@
                 </button>
                 @if ($patient->enabled)
                     <button class="p-3 rounded border w-24 border-amber-500 text-amber-500" type="button"
-                        onclick="HoldFn('{{ $patient->hn }}')">
+                        onclick="HoldFn('{{ $patient->vn }}')">
                         Hold
                     </button>
                     <button class="p-3 rounded border w-24 border-green-600 text-green-600" type="button"
-                        onclick="SuccessFn('{{ $patient->hn }}')">
+                        onclick="SuccessFn('{{ $patient->vn }}')">
                         Success
                     </button>
                 @endif
@@ -124,38 +124,37 @@
             await axios.post("{{ env('APP_URL') }}/station/getTask", formData).then((res) => {
                 const tasks = res.data.tasks
                 setHtml = '';
-                var index =
-                    tasks.forEach(function(val, i) {
-                        setHtml = setHtml + '<div class="grid grid-cols-4 shadow mb-2">';
-                        setHtml = setHtml + '<div class="p-2 ">' + val.hn + '</div>'
-                        setHtml = setHtml + '<div class="p-2 ">';
-                        setHtml = setHtml + '<div>' + val.name + '</div>'
-                        if (val.reason !== null) {
-                            setHtml = setHtml + '<div class="text-red-600 text-start text-xs">' + val
-                                .reason +
-                                '</div>'
-                        }
-                        setHtml = setHtml + '</div>';
-                        setHtml = setHtml + '<div class="p-2 ">'
-                        setHtml = setHtml + '<div class="">' + val.assign + '</div>'
-                        setHtml = setHtml + '<div class="text-red-600">( ' + val.Time + ' mins. )</div>'
-                        setHtml = setHtml + '</div>'
-                        setHtml = setHtml + '<div class="p-2 gap-2 text-center flex">';
+                tasks.forEach(function(val, i) {
+                    setHtml = setHtml + '<div class="grid grid-cols-4 shadow mb-2">';
+                    setHtml = setHtml + '<div class="p-2 ">' + val.hn + '</div>'
+                    setHtml = setHtml + '<div class="p-2 ">';
+                    setHtml = setHtml + '<div>' + val.name + '</div>'
+                    if (val.reason !== null) {
+                        setHtml = setHtml + '<div class="text-red-600 text-start text-xs">' + val
+                            .reason +
+                            '</div>'
+                    }
+                    setHtml = setHtml + '</div>';
+                    setHtml = setHtml + '<div class="p-2 ">'
+                    setHtml = setHtml + '<div class="">' + val.assign + '</div>'
+                    setHtml = setHtml + '<div class="text-red-600">( ' + val.Time + ' mins. )</div>'
+                    setHtml = setHtml + '</div>'
+                    setHtml = setHtml + '<div class="p-2 gap-2 text-center flex">';
+                    setHtml = setHtml +
+                        '<button class="p-3 flex-grow rounded border border-blue-600 text-blue-600" type="button" onclick="CallFn(\'' +
+                        val.vn + '\')">Call</button>'
+                    if (type == 'process') {
                         setHtml = setHtml +
-                            '<button class="p-3 flex-grow rounded border border-blue-600 text-blue-600" type="button" onclick="CallFn(\'' +
-                            val.hn + '\')">Call</button>'
-                        if (type == 'process') {
-                            setHtml = setHtml +
-                                '<button class="p-3 flex-grow rounded border border-amber-500 text-amber-500" type="button" onclick="HoldFn(\'' +
-                                val.hn + '\')">Hold</button>'
-                        } else if (type == 'wait') {
-                            setHtml = setHtml +
-                                '<button class="p-3 flex-grow rounded border border-red-600 text-red-600" type="button" onclick="DeleteFn(\'' +
-                                val.hn + '\')">Delete</button>'
-                        }
-                        setHtml = setHtml + '</div>';
-                        setHtml = setHtml + '</div>'
-                    })
+                            '<button class="p-3 flex-grow rounded border border-amber-500 text-amber-500" type="button" onclick="HoldFn(\'' +
+                            val.vn + '\')">Hold</button>'
+                    } else if (type == 'wait') {
+                        setHtml = setHtml +
+                            '<button class="p-3 flex-grow rounded border border-red-600 text-red-600" type="button" onclick="DeleteFn(\'' +
+                            val.vn + '\')">Delete</button>'
+                    }
+                    setHtml = setHtml + '</div>';
+                    setHtml = setHtml + '</div>'
+                })
                 if (type == 'process') {
                     $('#waiting').html(setHtml)
                 } else if (type == 'wait') {
@@ -190,10 +189,10 @@
             }, 1000 * 30);
         }
 
-        async function SuccessFn(hn) {
+        async function SuccessFn(vn) {
             const alert = await Swal.fire({
                 icon: 'info',
-                title: 'Success Confirm : ' + hn,
+                title: 'Success Confirm : ' + vn,
                 confirmButtonColor: 'green',
                 confirmButtonText: 'SUCCESS!',
                 showCancelButton: true,
@@ -202,23 +201,23 @@
             if (alert.isConfirmed) {
                 const formData = new FormData();
                 formData.append('substation_id', '{{ $substation->id }}');
-                formData.append('hn', hn);
+                formData.append('vn', vn);
                 await axios.post("{{ env('APP_URL') }}/station/success", formData).then((res) => {
                     location.reload();
                 })
             }
         }
 
-        async function CallFn(hn) {
+        async function CallFn(vn) {
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
-            formData.append('hn', hn);
+            formData.append('vn', vn);
             await axios.post("{{ env('APP_URL') }}/station/call", formData).then((res) => {
                 location.reload();
             })
         }
 
-        async function HoldFn(hn) {
+        async function HoldFn(vn) {
             const {
                 value: reason
             } = await Swal.fire({
@@ -232,7 +231,7 @@
             if (reason !== '') {
                 const formData = new FormData();
                 formData.append('substation_id', '{{ $substation->id }}');
-                formData.append('hn', hn);
+                formData.append('vn', vn);
                 formData.append('reason', reason);
                 await axios.post("{{ env('APP_URL') }}/station/hold", formData).then((res) => {
                     location.reload();
@@ -247,10 +246,10 @@
 
         }
 
-        async function DeleteFn(hn) {
+        async function DeleteFn(vn) {
             const alert = await Swal.fire({
                 icon: 'warning',
-                title: 'Delete Confirm : ' + hn,
+                title: 'Delete Confirm : ' + vn,
                 confirmButtonColor: 'red',
                 confirmButtonText: 'Delete!',
                 showCancelButton: true,
@@ -259,7 +258,7 @@
             if (alert.isConfirmed) {
                 const formData = new FormData();
                 formData.append('substation_id', '{{ $substation->id }}');
-                formData.append('hn', hn);
+                formData.append('vn', vn);
                 await axios.post("{{ env('APP_URL') }}/station/delete", formData).then((res) => {
                     location.reload();
                 })

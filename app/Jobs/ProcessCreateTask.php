@@ -141,6 +141,7 @@ class ProcessCreateTask implements ShouldQueue
                             $newTask->patient_id = $patient->id;
                             $newTask->date = date('Y-m-d');
                             $newTask->hn = $data->HN;
+                            $newTask->vn = $data->VN;
                             $newTask->code = $code;
                             if($code == 'b12_vitalsign'){
                                 $newTask->assign = date('Y-m-d H:i:s');

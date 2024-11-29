@@ -28,6 +28,7 @@ return new class extends Migration
             $table->integer('patient_id');
             $table->date('date');
             $table->string('hn');
+            $table->string('vn');
             $table->string('code');
             $table->enum('type',['process','wait','work','success'])->default('process');
             $table->dateTime('assign')->nullable();

@@ -32,7 +32,6 @@
         formData.append('userid', userid);
         formData.append('password', password);
         const res = await axios.post("{{ env('APP_URL') }}/authcheck", formData);
-        console.log(res)
         if (res.data.status == 1) {
             window.location = "{{ env('APP_URL') }}/station";
         } else {

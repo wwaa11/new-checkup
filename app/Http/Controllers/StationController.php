@@ -78,7 +78,7 @@ class StationController extends Controller
         $substation = Substation::find($id);
         if($substation->now !== null){
             $patient = Patient::where('date', date('Y-m-d'))
-                ->where('hn', $substation->now)
+                ->where('vn', $substation->now)
                 ->first();
             if($patient == null){
                 $substation->now = null;
@@ -184,8 +184,9 @@ class StationController extends Controller
             ->whereNull('patienttasks.success')
             ->orderBy('patienttasks.assign','asc')
             ->select(
-                'patients.hn',
                 'patients.name',
+                'patients.hn',
+                'patients.vn',
                 'patienttasks.assign',
                 'patienttasks.type',
                 'patienttasks.memo1',
@@ -226,7 +227,7 @@ class StationController extends Controller
         $substation = Substation::find($request->substation_id);
         if($substation->now !== null){
             $now_task = Patienttask::whereDate('date', date('Y-m-d'))
-                ->where('hn', $substation->now)
+                ->where('vn', $substation->now)
                 ->where('code', $substation->station->code)
                 ->first();
 
@@ -244,11 +245,11 @@ class StationController extends Controller
             $newPatientLog->user = Auth::user()->userid;
             $newPatientLog->save();
         }
-        $type = ($request->hn == 'undefined') ? false : $request->hn;
+        $type = ($request->vn == 'undefined') ? false : $request->vn;
         if($type){
             $task = Patienttask::whereDate('date', date('Y-m-d'))
+                ->where('vn', $type)
                 ->where('code', $substation->station->code)
-                ->where('hn', $type)
                 ->whereNotNull('assign')
                 ->orderBy('assign','asc')
                 ->first();
@@ -265,7 +266,7 @@ class StationController extends Controller
             $task->call = date('Y-m-d H:i:s');
             $task->save();
 
-            $substation->now = $task->hn;
+            $substation->now = $task->vn;
             $substation->save();
 
             $newPatientLog = new Patientlogs;
@@ -282,12 +283,12 @@ class StationController extends Controller
     function holdTask(Request $request)
     {
         $substation = Substation::find($request->substation_id);
-        if($substation->now == $request->hn){
+        if($substation->now == $request->vn){
             $substation->now = null;
             $substation->save();
         }
         $task = Patienttask::whereDate('date', date('Y-m-d'))
-            ->where('hn', $request->hn)
+            ->where('vn', $request->vn)
             ->where('code', $substation->station->code)
             ->first();
 
@@ -314,7 +315,7 @@ class StationController extends Controller
         $substation->save();
 
         $task = Patienttask::whereDate('date', date('Y-m-d'))
-            ->where('hn', $request->hn)
+            ->where('vn', $request->vn)
             ->where('code', $substation->station->code)
             ->first();
 
@@ -332,7 +333,7 @@ class StationController extends Controller
 
         if($substation->station->code == 'b12_vitalsign'){
             $task = Patienttask::whereDate('date', date('Y-m-d'))
-                ->where('hn', $request->hn)
+                ->where('vn', $request->vn)
                 ->where('code', 'b12_lab')
                 ->first();
 
@@ -356,7 +357,7 @@ class StationController extends Controller
     {
         $substation = Substation::find($request->substation_id);
         $task = Patienttask::whereDate('date', date('Y-m-d'))
-            ->where('hn', $request->hn)
+            ->where('vn', $request->vn)
             ->where('code', $substation->station->code)
             ->first();
 
@@ -412,7 +413,7 @@ class StationController extends Controller
             $substation->save();
 
             $task = Patienttask::whereDate('date', date('Y-m-d'))
-                ->where('hn', $request->hn)
+                ->where('vn', $request->vn)
                 ->where('code', $code)
                 ->first();
             $task->type = 'success';
@@ -429,7 +430,7 @@ class StationController extends Controller
 
             if($substation->station->code == 'b12_vitalsign'){
                 $task = Patienttask::whereDate('date', date('Y-m-d'))
-                    ->where('hn', $request->hn)
+                    ->where('vn', $request->vn)
                     ->where('code', 'b12_lab')
                     ->first();
     
@@ -452,7 +453,8 @@ class StationController extends Controller
 
         return response()->json(['status' => 'unsuccess'], 200);
     }
-    function history(Request $request){
+    function history(Request $request)
+    {
         $date = ($request->date == 'today') ? date('Y-m-d') : $request->date;
         
         if($request->input !== 'null'){
@@ -465,5 +467,66 @@ class StationController extends Controller
         }
         
         return view('station.history')->with(compact('patient'));
+    }
+    function displayPage($station)
+    {
+        switch ($station) {
+            case 'vitalsign':
+                $code = ['b12_vitalsign'];
+                break;
+            case 'lab':
+                $code = ['b12_lab'];
+                break;
+            default:
+                $code = [];
+                break;
+        }
+        $stations = Station::whereIn('code', $code)->get();
+        $stationid = [];
+        foreach ($stations as $key => $value) {
+            $stationid[] = $value->id;
+        }
+        $stationid = json_encode($stationid);
+
+        return view('station.display')->with(compact('stations', 'stationid'));
+    }
+    function displayList(Request $request)
+    {
+        $station = json_decode($request->station);
+        $stations = Station::whereIn('id', $station)->get();
+        $substation = [];
+        foreach ($stations as $station) {
+            foreach($station->substations as $sub){
+                if($sub->now !== null){
+                    $patient = Patient::whereDate('date', date('Y-m-d'))
+                        ->where('vn', $sub->now)
+                        ->first();
+                    if($patient !== null){
+                        $substation[] = [
+                            'id' => $station->id.'_'.$sub->id,
+                            'now' => $sub->now,
+                            'lang' => $patient->lang
+                        ];
+                    }
+                }else{
+                    $substation[] = [
+                        'id' => $station->id.'_'.$sub->id,
+                        'now' => null,
+                        'lang' => null
+                    ];
+                }
+            }
+        }
+        $tasks = Patienttask::whereDate('date', date('Y-m-d'))
+            ->whereNotNull('assign')
+            ->whereIn('type', ['process', 'wait'])
+            ->orderby('assign', 'asc')
+            ->get();
+        $data = [];
+        foreach ($tasks as $value) {
+            $data[$value->type][] = $value->vn;
+        }
+
+        return response()->json(['status' => 'success', 'substation' => $substation, 'data' => $data], 200);
     }
 }

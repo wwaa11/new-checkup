@@ -17,6 +17,10 @@ Route::post('/unauth', function () {  Auth::logout(); });
 Route::get('/sms/{hn}', [PatientController::class, 'smsRequest']);
 Route::post('/requestNumber', [PatientController::class, 'requestNumber']);
 
+Route::get('/display/{station}', [StationController::class, 'displayPage']);
+Route::post('/display/list', [StationController::class, 'displayList']);
+
+
 Route::middleware([pr9Auth::class])->group(function () {
     Route::get('/verify', [PatientController::class, 'verify']);
     Route::post('/verify', [PatientController::class, 'verifySearch']);
