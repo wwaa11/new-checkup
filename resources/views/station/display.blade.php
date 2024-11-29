@@ -151,6 +151,10 @@
         for (let index = 0; index < callArr.length; index++) {
             await playsounds(callArr[index]);
         }
+
+        setTimeout(function() {
+            getList()
+        }, 1000 * 5);
     }
 
     async function playsounds(id) {
@@ -158,12 +162,20 @@
         lang = $('#' + id + 'lang').val();
         room = $('#' + id + 'station').val();
         station = $('#' + id + 'code').val();
+
         swal = Swal.fire({
             title: '<div>ขอเชิญหมายเลข</div><div><b style="color: red;font-size: 3em; padding-x: 3em">' +
                 vn + '</b><div><div>ที่ห้อง ' + room + '</div>',
             allowOutsideClick: false,
             showConfirmButton: false,
         })
+
+        isCall = localStorage.getItem(room + vn);
+        if (isCall !== vn) {
+            localStorage.setItem(room + vn, vn);
+            console.log('play 1' + vn)
+        }
+
         await playsounds(vn, lang, room, station)
         await new Promise(r => setTimeout(r, 2000));
         swal.close()
