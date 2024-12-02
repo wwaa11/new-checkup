@@ -221,7 +221,7 @@
 
             setTimeout(function() {
                 getSSP(type)
-            }, 1000 * 30);
+            }, 1000 * 60);
         }
 
         async function changeSSP(vn) {

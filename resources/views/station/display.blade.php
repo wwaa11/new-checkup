@@ -143,7 +143,7 @@
             waitHtml = ''
             for (let index = 0; index < res.data.data.wait.length; index++) {
                 waitHtml = waitHtml + '<div class="text-6xl colorChangeText p-6 font-bold shadow-lg m-3">' +
-                    process[index] + '</div>'
+                    wait[index] + '</div>'
             }
             $('#wait').html(waitHtml)
         })
