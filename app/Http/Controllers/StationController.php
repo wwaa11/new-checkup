@@ -206,6 +206,65 @@ class StationController extends Controller
 
         return response()->json(['status' => 'success', 'tasks' => $tasks], 200);
     }
+    function getSSP(Request $request)
+    {
+        $ALLgetssp = DB::connection('SSB')
+            ->table("HNLABREQ_HEADER")
+            ->join("HNLABREQ_MEMO", "HNLABREQ_HEADER.RequestNo", "HNLABREQ_MEMO.RequestNo")
+            ->whereDate('EntryDateTime', date('Y-m-d'))
+            ->select('HNLABREQ_HEADER.HN','HNLABREQ_MEMO.RemarksMemo')
+            ->get();
+
+        $changeTask = Patienttask::whereDate('date', date('Y-m-d'))
+            ->where('code', 'b12_lab')
+            ->whereNull('memo5')
+            ->get();
+            
+        foreach ($changeTask as $task) {
+            $getssp = collect($ALLgetssp)->where('HN', $task->hn)->where('RemarksMemo', 'like', "ssp");
+            if (count($getssp) > 0) {
+                $task->memo5 = 1;
+                $task->save();
+            }
+        }
+
+        $tasks = Patienttask::join('patients', 'patients.id','patienttasks.patient_id')
+        ->whereDate('patients.date', date('Y-m-d'))
+        ->where('patienttasks.code', 'b12_lab')
+        ->whereIn('memo5', [1,2])
+        ->orderBy('patienttasks.memo5','asc')
+        ->orderBy('patienttasks.vn','asc')
+        ->select(
+            'patients.hn',
+            'patients.vn',
+            'patients.name',
+            'patienttasks.memo5',
+            )
+        ->get();
+
+        return response()->json(['status' => 'success', 'tasks' => $tasks], 200);
+    }
+    function changeSSPTask(Request $request)
+    {
+        $changeTask = Patienttask::whereDate('date', date('Y-m-d'))
+            ->where('code', 'b12_lab')
+            ->where('vn', $request->vn)
+            ->first();
+
+        $changeTask->memo5 = 2;
+        $changeTask->save();
+
+        $newPatientLog = new Patientlogs;
+        $newPatientLog->patient_id = $changeTask->patient_id;
+        $newPatientLog->date = date('Y-m-d');
+        $newPatientLog->hn = $changeTask->hn;
+        $newPatientLog->text = 'SSP Change';
+        $newPatientLog->user = Auth::user()->userid;
+        $newPatientLog->save();
+
+        return response()->json(['status' => 'success', 'tasks' => $changeTask], 200);
+
+    }
     function allTask(Request $request)
     {
         $substation = Substation::find($request->substation_id);
@@ -216,6 +275,7 @@ class StationController extends Controller
             ->orderBy('patienttasks.created_at','asc')
             ->select(
                 'patients.hn',
+                'patients.vn',
                 'patients.name',
                 )
             ->get();
@@ -495,7 +555,9 @@ class StationController extends Controller
         $station = json_decode($request->station);
         $stations = Station::whereIn('id', $station)->get();
         $substation = [];
+        $code = [];
         foreach ($stations as $station) {
+            $code[] = $station->code;
             foreach($station->substations as $sub){
                 if($sub->now !== null){
                     $patient = Patient::whereDate('date', date('Y-m-d'))
@@ -518,11 +580,17 @@ class StationController extends Controller
             }
         }
         $tasks = Patienttask::whereDate('date', date('Y-m-d'))
+            ->where(function ($query) use ($code) {
+                $query->whereIn('code', $code);
+            })
             ->whereNotNull('assign')
             ->whereIn('type', ['process', 'wait'])
             ->orderby('assign', 'asc')
             ->get();
-        $data = [];
+        $data = [
+            'process' => [], 
+            'wait' => [], 
+        ];
         foreach ($tasks as $value) {
             $data[$value->type][] = $value->vn;
         }

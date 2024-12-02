@@ -24,7 +24,7 @@
     }
 </style>
 
-<body class="font-sans antialiased overflow-hidden">
+<body class="font-sans antialiased overflow-hidden" auto>
     <div class="w-full h-screen">
         <div class="w-full max-h-[13%] shadow-lg mb-2 flex font-bold">
             <div class="flex-shrink m-3">
@@ -78,7 +78,6 @@
                 </div>
             </div>
         </div>
-        <div class="min-h-[5%] colorChangeBG"></div>
     </div>
 </body>
 <script>
@@ -130,11 +129,11 @@
                     callArr.push(sub[index]['id'])
                 }
                 $('#' + sub[index]['id']).html(display)
-                $('#' + sub[index]['id'] + 'lang').html(sub[index]['lang'])
+                $('#' + sub[index]['id'] + 'lang').val(sub[index]['lang'])
             }
             process = res.data.data.process
             processHtml = ''
-            for (let index = 0; index < 20; index++) {
+            for (let index = 0; index < res.data.data.process.length; index++) {
                 processHtml = processHtml +
                     '<div class="text-6xl colorChangeText p-6 font-bold shadow-lg m-3">' + process[index] +
                     '</div>'
@@ -142,14 +141,14 @@
             $('#process').html(processHtml)
             wait = res.data.data.wait
             waitHtml = ''
-            for (let index = 0; index < 10; index++) {
+            for (let index = 0; index < res.data.data.wait.length; index++) {
                 waitHtml = waitHtml + '<div class="text-6xl colorChangeText p-6 font-bold shadow-lg m-3">' +
                     process[index] + '</div>'
             }
             $('#wait').html(waitHtml)
         })
         for (let index = 0; index < callArr.length; index++) {
-            await playsounds(callArr[index]);
+            await playID(callArr[index]);
         }
 
         setTimeout(function() {
@@ -157,28 +156,33 @@
         }, 1000 * 5);
     }
 
-    async function playsounds(id) {
+    async function playID(id) {
         vn = $('#' + id).html();
         lang = $('#' + id + 'lang').val();
         room = $('#' + id + 'station').val();
         station = $('#' + id + 'code').val();
 
-        swal = Swal.fire({
-            title: '<div>ขอเชิญหมายเลข</div><div><b style="color: red;font-size: 3em; padding-x: 3em">' +
-                vn + '</b><div><div>ที่ห้อง ' + room + '</div>',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-        })
-
         isCall = localStorage.getItem(room + vn);
-        if (isCall !== vn) {
-            localStorage.setItem(room + vn, vn);
-            console.log('play 1' + vn)
-        }
+        CallNum = localStorage.getItem(room + vn + 'call');
 
-        await playsounds(vn, lang, room, station)
-        await new Promise(r => setTimeout(r, 2000));
-        swal.close()
+        if (CallNum == null || CallNum == '1') {
+            swal = Swal.fire({
+                title: '<div>ขอเชิญหมายเลข</div><div><b style="color: red;font-size: 3em; padding-x: 3em">' +
+                    vn + '</b><div><div>ที่ห้อง ' + room + '</div>',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+            })
+
+            localStorage.setItem(room + vn, vn);
+            if (CallNum == null) {
+                CallNum = 0
+            }
+            localStorage.setItem(room + vn + 'call', CallNum + 1);
+
+            await playsounds(vn, lang, room, station)
+            await new Promise(r => setTimeout(r, 2000));
+            swal.close()
+        }
 
         return 'success'
     }
@@ -388,20 +392,7 @@
                 };
             }
         });
-        var roomNum = (function(room) {
-            switch (room) {
-                case 1:
-                    return room1;
-                case 2:
-                    return room2;
-                case 3:
-                    return room3;
-                case 4:
-                    return room4;
-                case 5:
-                    return room5;
-            }
-        })(room);
+
         var station_name = (function(station) {
             switch (station) {
                 case "b12_register":
@@ -431,16 +422,38 @@
             }
         })(station);
 
-        await audioin.play()
-        await num1.play();
-        await num2.play();
-        await num3.play();
-        await num4.play();
-        await station_name.play();
-        await room.play();
-        await audioout.play();
+        var roomNum = (function(room) {
+            switch (room) {
+                case '1':
+                    return room1;
+                case '2':
+                    return room2;
+                case '3':
+                    return room3;
+                case '4':
+                    return room4;
+                case '5':
+                    return room5;
+            }
+        })(room);
+
+        await playAudio(audioin)
+        await playAudio(num1)
+        await playAudio(num2)
+        await playAudio(num3)
+        await playAudio(num4)
+        await playAudio(station_name)
+        await playAudio(roomNum)
+        await playAudio(audioout)
 
         return 'success'
+    }
+
+    function playAudio(audio) {
+        return new Promise(res => {
+            audio.play()
+            audio.onended = res
+        })
     }
 </script>
 

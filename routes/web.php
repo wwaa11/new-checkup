@@ -38,8 +38,10 @@ Route::middleware([pr9Auth::class])->group(function () {
     Route::post('/station/success', [StationController::class, 'successTask']);
     Route::post('/station/delete', [StationController::class, 'deleteTask']);
     Route::post('/station/checksuccess', [StationController::class, 'checksuccessTask']);
+    Route::post('/station/changeSSP', [StationController::class, 'changeSSPTask']);
 
     Route::post('/station/getTask', [StationController::class, 'getTask']);
+    Route::post('/station/getSSP', [StationController::class, 'getSSP']);
     Route::post('/station/allTask', [StationController::class, 'allTask']);
     
 });

@@ -15,6 +15,7 @@ use Log;
 class ProcessCreateTask implements ShouldQueue
 {
     use Queueable;
+    public $tries = 5;
 
     public function backoff(): array
     {
@@ -175,10 +176,11 @@ class ProcessCreateTask implements ShouldQueue
             } 
             catch (\Throwable $th) {
                 Log::channel('debug')->notice($data->HN . ' err Data.');
+                Log::channel('debug')->notice($patient);
                 Log::channel('debug')->notice($th);
             }
         }
 
-        ProcessCreateTask::dispatch()->delay(10);
+        ProcessCreateTask::dispatch()->delay(5);
     }
 }
