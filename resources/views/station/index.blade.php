@@ -14,7 +14,7 @@
                         </a>
                     @endif
                     @if ($key == 'ห้องเจาะเลือด')
-                        <a href="{{ env('APP_URL') }}/station/register/{{ $station[0]['station_id'] }}">
+                        <a href="{{ env('APP_URL') }}/station/labcount">
                             <div class="p-3 text-center rounded-md border-2 mb-3 border-red-300">Patient Counts</div>
                         </a>
                     @endif
