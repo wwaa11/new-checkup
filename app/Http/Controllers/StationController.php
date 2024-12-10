@@ -598,4 +598,20 @@ class StationController extends Controller
 
         return response()->json(['status' => 'success', 'substation' => $substation, 'data' => $data], 200);
     }
+    function labCount()
+    {
+        $tasks = Patienttask::join('patients', 'patients.id','patienttasks.patient_id')
+            ->whereDate('patients.date', date('Y-m-d'))
+            ->where('patienttasks.code', 'b12_lab')
+            ->whereNotNull('patienttasks.success')
+            ->orderBy('patienttasks.success','asc')
+            ->select(
+                'patients.hn',
+                'patients.vn',
+                'patients.name',
+                )
+            ->paginate(20);
+
+        return view('station.labcount')->with(compact('tasks'));
+    }
 }

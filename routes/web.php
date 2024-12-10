@@ -33,6 +33,8 @@ Route::middleware([pr9Auth::class])->group(function () {
     Route::get('/station/register/{id}', [StationController::class, 'Register']);
     Route::post('/station/register', [StationController::class, 'registerTask']);
 
+    Route::get('/station/labcount', [StationController::class, 'labCount']);
+
     Route::post('/station/call', [StationController::class, 'callTask']);
     Route::post('/station/hold', [StationController::class, 'holdTask']);
     Route::post('/station/success', [StationController::class, 'successTask']);
