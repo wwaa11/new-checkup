@@ -610,7 +610,7 @@ class StationController extends Controller
                 'patients.vn',
                 'patients.name',
                 )
-            ->paginate(20);
+            ->get();
 
         return view('station.labcount')->with(compact('tasks'));
     }
