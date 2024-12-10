@@ -84,7 +84,7 @@
         setTimeout(function() {
             startTime()
             getList()
-        }, 1000 * 30);
+        }, 1000 * 1);
     });
 
     function checkTime(i) {
