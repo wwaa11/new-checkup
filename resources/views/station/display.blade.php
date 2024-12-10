@@ -81,8 +81,10 @@
 </body>
 <script>
     $(document).ready(function() {
-        startTime()
-        getList()
+        setTimeout(function() {
+            startTime()
+            getList()
+        }, 1000 * 30);
     });
 
     function checkTime(i) {

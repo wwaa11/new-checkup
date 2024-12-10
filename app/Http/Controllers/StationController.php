@@ -159,8 +159,9 @@ class StationController extends Controller
             $task->hn = $patient->hn;
             $task->code = $station->code;
         }
-        $task->type = 'process';
+        $task->success = null;
         $task->assign = date('Y-m-d H:i:s');
+        $task->type = 'process';
         $task->save();
 
         $newPatientLog = new Patientlogs;
