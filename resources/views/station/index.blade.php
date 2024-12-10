@@ -13,6 +13,11 @@
                             <div class="p-3 text-center rounded-md border-2 mb-3 border-yellow-300">Register</div>
                         </a>
                     @endif
+                    @if ($key == 'ห้องเจาะเลือด')
+                        <a href="{{ env('APP_URL') }}/station/register/{{ $station[0]['station_id'] }}">
+                            <div class="p-3 text-center rounded-md border-2 mb-3 border-red-300">Patient Counts</div>
+                        </a>
+                    @endif
                     <div class="grid @if (count($station) > 1) grid-cols-2 @endif gap-3">
                         @foreach ($station as $sub)
                             <a href="{{ env('APP_URL') }}/station/{{ $sub['id'] }}">
