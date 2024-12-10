@@ -113,7 +113,7 @@
                 if ('{{ $patient->enabled }}' == 1) {
                     setTimeout(function() {
                         checksuccess();
-                    }, 1000 * 30);
+                    }, 1000 * 10);
                 }
                 if ('{{ $substation->station->code }}' == 'b12_lab') {
                     getSSP();
