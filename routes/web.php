@@ -36,6 +36,7 @@ Route::middleware([pr9Auth::class])->group(function () {
     Route::get('/station/lab/count', [StationController::class, 'labCount']);
 
     Route::post('/station/call', [StationController::class, 'callTask']);
+    Route::post('/station/callsound', [StationController::class, 'callTask']);
     Route::post('/station/hold', [StationController::class, 'holdTask']);
     Route::post('/station/success', [StationController::class, 'successTask']);
     Route::post('/station/delete', [StationController::class, 'deleteTask']);

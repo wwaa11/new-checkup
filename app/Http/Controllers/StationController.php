@@ -349,7 +349,24 @@ class StationController extends Controller
     }
     function callTaskAgain(Request $request)
     {
-        
+        $substation = Substation::find($request->substation_id);
+        $task = Patienttask::whereDate('date', date('Y-m-d'))
+                ->where('vn', $request->vn)
+                ->where('code', $substation->station->code)
+                ->whereNotNull('assign')
+                ->orderBy('assign','asc')
+                ->first();
+
+        $task->call_time = 1;
+        $task->save();
+
+        $newPatientLog = new Patientlogs;
+        $newPatientLog->patient_id = $task->patient->id;
+        $newPatientLog->date = date('Y-m-d');
+        $newPatientLog->hn = $task->patient->hn;
+        $newPatientLog->text = 'เรียกคิวที่ : '. $substation->name;
+        $newPatientLog->user = Auth::user()->userid;
+        $newPatientLog->save();
 
         return response()->json(['status' => 'success'], 200);
     }

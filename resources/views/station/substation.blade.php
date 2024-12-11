@@ -6,21 +6,26 @@
     <div class="p-6">
         <div class="flex px-6 gap-3">
             <div class="flex-shrink p-3 font-bold text-2xl text-gray-600">{{ $substation->name }}</div>
-            <div class="flex-grow p-3 font-bold text-2xl shadow bg-gray-100">
-                @if ($patient->enabled)
-                    <div class="grid grid-cols-2 w-full gap-3 text-gray-600">
-                        <div class="text-end">VN: <span class="text-red-600" id="vn">{{ $patient->vn }}</span></div>
-                        <div>Name: <span class="text-blue-600">{{ $patient->name }}</span> ( <span class="text-blue-600"
-                                id="hn">{{ $patient->hn }}</span> )</div>
-                    </div>
-                @endif
-            </div>
-            <div class="flex-shrink gap-3 flex">
+            <div class="flex-grow gap-3 flex">
                 <button class="p-3 rounded border w-24 border-blue-500 text-blue-500 hover:bg-blue-600 hover:text-white"
                     type="button" onclick="CallFn()">
-                    Call
+                    Call New Patient
                 </button>
+                <div class="flex-grow p-3 pt-5 font-bold text-2xl shadow bg-gray-100">
+                    @if ($patient->enabled)
+                        <div class="grid grid-cols-2 w-full gap-3 text-gray-600">
+                            <div class="text-end">VN: <span class="text-red-600" id="vn">{{ $patient->vn }}</span>
+                            </div>
+                            <div>Name: <span class="text-blue-600">{{ $patient->name }}</span> ( <span class="text-blue-600"
+                                    id="hn">{{ $patient->hn }}</span> )</div>
+                        </div>
+                    @endif
+                </div>
                 @if ($patient->enabled)
+                    <button class="p-3 rounded border w-24 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white"
+                        type="button" onclick="CallSoundFn('{{ $patient->vn }}')">
+                        Call Sound
+                    </button>
                     <button
                         class="p-3 rounded border w-24 border-amber-500 text-amber-500 hover:bg-amber-600 hover:text-white"
                         type="button" onclick="HoldFn('{{ $patient->vn }}')">
@@ -95,7 +100,6 @@
                             </div>
                         </div>
                         <div class="flex-col" id="ssp"></div>
-
                     </div>
                 @endif
             </div>
@@ -112,7 +116,7 @@
                 '{{ $substation->station->code }}' == 'b12_lab') {
                 if ('{{ $patient->enabled }}' == 1) {
                     setTimeout(function() {
-                        checksuccess();
+                        // checksuccess();
                     }, 1000 * 10);
                 }
                 if ('{{ $substation->station->code }}' == 'b12_lab') {
@@ -148,7 +152,11 @@
                 const tasks = res.data.tasks
                 setHtml = '';
                 tasks.forEach(function(val, i) {
-                    setHtml = setHtml + '<div class="grid grid-cols-4 shadow mb-2">';
+                    setHtml = setHtml + '<div class="grid grid-cols-4 shadow mt-2 ';
+                    if (val.Time > 10) {
+                        setHtml = setHtml + 'bg-red-100';
+                    }
+                    setHtml = setHtml + '">';
                     setHtml = setHtml + '<div class="p-2 ">' + val.hn +
                         ' <div class="text-blue-600">(' + val.vn +
                         ') </div>' + '</div>'
@@ -166,15 +174,15 @@
                     setHtml = setHtml + '</div>'
                     setHtml = setHtml + '<div class="p-2 gap-2 text-center flex">';
                     setHtml = setHtml +
-                        '<button class="p-3 flex-grow rounded border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white" type="button" onclick="CallFn(\'' +
+                        '<button class="bg-white p-3 flex-grow rounded border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white" type="button" onclick="CallFn(\'' +
                         val.vn + '\')">Call</button>'
                     if (type == 'process') {
                         setHtml = setHtml +
-                            '<button class="p-3 flex-grow rounded border border-amber-500 text-amber-500 hover:bg-amber-600 hover:text-white" type="button" onclick="HoldFn(\'' +
+                            '<button class="bg-white p-3 flex-grow rounded border border-amber-500 text-amber-500 hover:bg-amber-600 hover:text-white" type="button" onclick="HoldFn(\'' +
                             val.vn + '\')">Hold</button>'
                     } else if (type == 'wait') {
                         setHtml = setHtml +
-                            '<button class="p-3 flex-grow rounded border border-red-600 text-red-600 hover:bg-red-600 hover:text-white" type="button" onclick="DeleteFn(\'' +
+                            '<button class="bg-white p-3 flex-grow rounded border border-red-600 text-red-600 hover:bg-red-600 hover:text-white" type="button" onclick="DeleteFn(\'' +
                             val.vn + '\')">Delete</button>'
                     }
                     setHtml = setHtml + '</div>';
@@ -291,6 +299,15 @@
             formData.append('vn', vn);
             await axios.post("{{ env('APP_URL') }}/station/call", formData).then((res) => {
                 location.reload();
+            })
+        }
+
+        async function CallSoundFn(vn) {
+            const formData = new FormData();
+            formData.append('substation_id', '{{ $substation->id }}');
+            formData.append('vn', vn);
+            await axios.post("{{ env('APP_URL') }}/station/callsound", formData).then((res) => {
+                alert(res)
             })
         }
 
