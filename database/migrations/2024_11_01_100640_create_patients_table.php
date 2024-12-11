@@ -33,6 +33,7 @@ return new class extends Migration
             $table->enum('type',['process','wait','work','success'])->default('process');
             $table->dateTime('assign')->nullable();
             $table->dateTime('call')->nullable();
+            $table->integer('call_time')->default(0);
             $table->dateTime('success')->nullable();
             $table->string('memo1')->nullable();
             $table->string('memo2')->nullable();

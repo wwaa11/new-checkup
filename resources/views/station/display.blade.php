@@ -72,7 +72,7 @@
             </div>
             <div class="col-span-1">
                 <div class="colorChangeBG rounded p-3 text-3xl">กรุณาติดต่อแผนก {{ $station->name }}</div>
-                <div class="grid grid-cols-2" id="wait">
+                <div class="grid grid-rows-4 grid-flow-col" id="wait">
 
                 </div>
             </div>
@@ -87,35 +87,6 @@
         }, 1000 * 20);
     });
 
-    function checkTime(i) {
-        if (i < 10) {
-            i = "0" + i
-        };
-        return i;
-    }
-
-    function startTime() {
-        var today = new Date();
-        var date = today.toLocaleDateString('th-TH', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
-        var dateen = today.getDate() + ' ' + today.toLocaleString('default', {
-            month: 'long'
-        }) + ' ' + today.getFullYear();
-        var h = today.getHours();
-        var m = today.getMinutes();
-        var s = today.getSeconds();
-        m = checkTime(m);
-        s = checkTime(s);
-        var t = setTimeout(startTime, 500);
-        $('#time').html(h + ":" + m)
-        $('#date').html(date)
-        $('#dateen').html(dateen)
-
-    }
-
     async function getList() {
         const callArr = []
         const formData = new FormData();
@@ -127,7 +98,9 @@
                     display = '-'
                 } else {
                     display = sub[index]['now']
-                    callArr.push(sub[index]['id'])
+                    if (sub[index]['call'] !== null && sub[index]['call'] < 3) {
+                        callArr.push(sub[index]['id'])
+                    }
                 }
                 $('#' + sub[index]['id']).html(display)
                 $('#' + sub[index]['id'] + 'lang').val(sub[index]['lang'])
@@ -146,7 +119,7 @@
             wait = res.data.data.wait
             waitHtml = ''
             for (let index = 0; index < res.data.data.wait.length; index++) {
-                if (index < 10) {
+                if (index < 8) {
                     waitHtml = waitHtml +
                         '<div class="text-6xl colorChangeText p-6 font-bold shadow-lg m-3">' +
                         wait[index] + '</div>'
@@ -154,6 +127,7 @@
             }
             $('#wait').html(waitHtml)
         })
+
         for (let index = 0; index < callArr.length; index++) {
             await playID(callArr[index]);
         }
@@ -172,24 +146,21 @@
         isCall = localStorage.getItem(room + vn);
         CallNum = localStorage.getItem(room + vn + 'call');
 
-        if (CallNum == null || CallNum == '1') {
-            swal = Swal.fire({
-                title: '<div>ขอเชิญหมายเลข</div><div><b style="color: red;font-size: 3em; padding-x: 3em">' +
-                    vn + '</b><div><div>ที่ห้อง ' + room + '</div>',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-            })
+        swal = Swal.fire({
+            title: '<div>ขอเชิญหมายเลข</div><div><b style="color: red;font-size: 3em; padding-x: 3em">' +
+                vn + '</b><div><div>ที่ห้อง ' + room + '</div>',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+        })
 
-            localStorage.setItem(room + vn, vn);
-            if (CallNum == null) {
-                CallNum = 0
-            }
-            localStorage.setItem(room + vn + 'call', CallNum + 1);
+        await playsounds(vn, lang, room, station)
+        await new Promise(r => setTimeout(r, 500));
+        swal.close()
 
-            await playsounds(vn, lang, room, station)
-            await new Promise(r => setTimeout(r, 500));
-            swal.close()
-        }
+        const formData = new FormData();
+        formData.append('station', station);
+        formData.append('vn', vn);
+        await axios.post("{{ env('APP_URL') }}/display/updateCall", formData)
 
         return 'success'
     }
@@ -461,6 +432,35 @@
             audio.play()
             audio.onended = res
         })
+    }
+
+    function checkTime(i) {
+        if (i < 10) {
+            i = "0" + i
+        };
+        return i;
+    }
+
+    function startTime() {
+        var today = new Date();
+        var date = today.toLocaleDateString('th-TH', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+        var dateen = today.getDate() + ' ' + today.toLocaleString('default', {
+            month: 'long'
+        }) + ' ' + today.getFullYear();
+        var h = today.getHours();
+        var m = today.getMinutes();
+        var s = today.getSeconds();
+        m = checkTime(m);
+        s = checkTime(s);
+        var t = setTimeout(startTime, 500);
+        $('#time').html(h + ":" + m)
+        $('#date').html(date)
+        $('#dateen').html(dateen)
+
     }
 </script>
 

@@ -117,7 +117,10 @@ class StationController extends Controller
             $ssbVN = DB::connection('SSB')
                 ->table('HNOPD_MASTER')
                 ->whereDate('VisitDate', date('Y-m-d'))
-                ->where('HN', $hn)
+                ->where(function ($query) use ($hn) {
+                    $query->where('HN', $hn)
+                        ->orwhere('VN', $hn);
+                })
                 ->select('VisitDate', 'VN', 'HN', )
                 ->first();
 
@@ -327,6 +330,7 @@ class StationController extends Controller
         if($task !== null){
             $task->type = 'work';
             $task->call = date('Y-m-d H:i:s');
+            $task->call_time = 1;
             $task->save();
 
             $substation->now = $task->vn;
@@ -358,6 +362,7 @@ class StationController extends Controller
         $task->type = 'wait';
         $task->assign = date('Y-m-d H:i:s');
         $task->call = null;
+        $task->call_time = 0;
         $task->memo4 = $request->reason;
         $task->save();
 
@@ -435,6 +440,26 @@ class StationController extends Controller
         $newPatientLog->text = 'ลบคิวที่ : '. $substation->name;
         $newPatientLog->user = Auth::user()->userid;
         $newPatientLog->save();
+
+        if($substation->station->code == 'b12_vitalsign'){
+            $task = Patienttask::whereDate('date', date('Y-m-d'))
+                ->where('vn', $request->vn)
+                ->where('code', 'b12_lab')
+                ->first();
+
+            if($task !== null){
+                $task->assign = date('Y-m-d H:i:s');
+                $task->save();
+
+                $newPatientLog = new Patientlogs;
+                $newPatientLog->patient_id = $task->patient->id;
+                $newPatientLog->date = date('Y-m-d');
+                $newPatientLog->hn = $task->patient->hn;
+                $newPatientLog->text = 'ลงทะเบียนคิวที่ : '. $substation->name;
+                $newPatientLog->user = Auth::user()->userid;
+                $newPatientLog->save();
+            }
+        }
 
         return response()->json(['status' => 'success'], 200);
     }
@@ -567,17 +592,24 @@ class StationController extends Controller
                         ->where('vn', $sub->now)
                         ->first();
                     if($patient !== null){
+                        $task = Patienttask::whereDate('date', date('Y-m-d'))
+                            ->where('vn', $sub->now)
+                            ->where('code', $station->code)
+                            ->first();
+
                         $substation[] = [
                             'id' => $station->id.'_'.$sub->id,
                             'now' => $sub->now,
-                            'lang' => $patient->lang
+                            'lang' => $patient->lang,
+                            'call' => $task->call_time
                         ];
                     }
                 }else{
                     $substation[] = [
                         'id' => $station->id.'_'.$sub->id,
                         'now' => null,
-                        'lang' => null
+                        'lang' => null,
+                        'call' => null
                     ];
                 }
             }
@@ -599,6 +631,18 @@ class StationController extends Controller
         }
 
         return response()->json(['status' => 'success', 'substation' => $substation, 'data' => $data], 200);
+    }
+    function updateCall(Request $request)
+    {
+        $task = Patienttask::whereDate('date', date('Y-m-d'))
+            ->where('code', $request->station)
+            ->where('vn', $request->vn)
+            ->first();
+
+        $task->call_time = $task->call_time + 1;
+        $task->save();
+
+        return response()->json('success', 200);
     }
     function labCount()
     {

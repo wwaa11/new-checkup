@@ -19,7 +19,7 @@ Route::post('/requestNumber', [PatientController::class, 'requestNumber']);
 
 Route::get('/display/{station}', [StationController::class, 'displayPage']);
 Route::post('/display/list', [StationController::class, 'displayList']);
-
+Route::post('/display/updateCall', [StationController::class, 'updateCall']);
 
 Route::middleware([pr9Auth::class])->group(function () {
     Route::get('/verify', [PatientController::class, 'verify']);

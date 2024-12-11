@@ -100,34 +100,36 @@ class ProcessCreateTask implements ShouldQueue
                     switch ($data->StationCode) {
                         case '01':
                             $code = 'b12_vitalsign';
+                            $text = 'Vital Sign';
                             break;
                         case '011':
                             $code = 'b12_lab';
+                            $text = 'Lab';
                             break;
-                            case '02':
-                        $code = 'b12_ekg';
-                            break;
-                        case '03':
-                            $code = 'b12_abi';
-                            break;
-                        case '04':
-                            $code = 'b12_estecho';
-                            break;
-                        case '06':
-                            $code = 'b12_chest';
-                            break;
-                        case '07':
-                            $code = 'b12_ultrasound';
-                            break;
-                        case '08':
-                            $code = 'b12_mammogram';
-                            break;
-                        case '09':
-                            $code = 'b12_boneden';
-                            break;
-                        case '10':
-                            $code = 'b12_gny';
-                            break;
+                        // case '02':
+                        //     $code = 'b12_ekg';
+                        //     break;
+                        // case '03':
+                        //     $code = 'b12_abi';
+                        //     break;
+                        // case '04':
+                        //     $code = 'b12_estecho';
+                        //     break;
+                        // case '06':
+                        //     $code = 'b12_chest';
+                        //     break;
+                        // case '07':
+                        //     $code = 'b12_ultrasound';
+                        //     break;
+                        // case '08':
+                        //     $code = 'b12_mammogram';
+                        //     break;
+                        // case '09':
+                        //     $code = 'b12_boneden';
+                        //     break;
+                        // case '10':
+                        //     $code = 'b12_gny';
+                        //     break;
                         default:
                             $code = false;
                             break;
@@ -156,7 +158,7 @@ class ProcessCreateTask implements ShouldQueue
                             $newPatientLog->patient_id = $patient->id;
                             $newPatientLog->date = date('Y-m-d');
                             $newPatientLog->hn = $data->HN;
-                            $newPatientLog->text = 'สร้างรายการ Check UP '.$code;
+                            $newPatientLog->text = 'สร้างรายการ Check UP : '.$text;
                             $newPatientLog->user = 'service';
                             $newPatientLog->save();
 
