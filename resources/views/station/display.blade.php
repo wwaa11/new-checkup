@@ -84,7 +84,7 @@
         startTime()
         setTimeout(function() {
             getList()
-        }, 1000 * 1);
+        }, 1000 * 20);
     });
 
     async function getList() {

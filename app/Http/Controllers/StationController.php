@@ -393,7 +393,7 @@ class StationController extends Controller
         $newPatientLog->patient_id = $task->patient->id;
         $newPatientLog->date = date('Y-m-d');
         $newPatientLog->hn = $task->patient->hn;
-        $newPatientLog->text = 'ปรับคิวไปยัง Waiting ที่ : '. $substation->name;
+        $newPatientLog->text = 'ปรับคิวไปยัง Waiting ที่ : '. $substation->station->name;
         $newPatientLog->user = Auth::user()->userid;
         $newPatientLog->save();
 
@@ -489,8 +489,11 @@ class StationController extends Controller
     function checksuccessTask(Request $request)
     {
         $code = $request->code;
+        $station = Statino::where('code', $code)->first();
+
         $isSuccess = false;
         if($request->code == 'b12_vitalsign'){
+            
             $getVS = DB::connection('SSB')
                 ->table("HNOPD_VITALSIGN")
                 ->whereDate('VisitDate', date('Y-m-d'))
@@ -527,6 +530,7 @@ class StationController extends Controller
                 ->where('vn', $request->vn)
                 ->where('code', $code)
                 ->first();
+
             $task->type = 'success';
             $task->success = date('Y-m-d H:i:s');
             $task->save();
@@ -535,7 +539,7 @@ class StationController extends Controller
             $newPatientLog->patient_id = $task->patient->id;
             $newPatientLog->date = date('Y-m-d');
             $newPatientLog->hn = $task->patient->hn;
-            $newPatientLog->text = 'สำเร็จรายการที่ : '. $code;
+            $newPatientLog->text = 'สำเร็จรายการที่ : '. $station->name;
             $newPatientLog->user = Auth::user()->userid;
             $newPatientLog->save();
 
@@ -553,7 +557,7 @@ class StationController extends Controller
                     $newPatientLog->patient_id = $task->patient->id;
                     $newPatientLog->date = date('Y-m-d');
                     $newPatientLog->hn = $task->patient->hn;
-                    $newPatientLog->text = 'ลงทะเบียนคิวที่ : '. $substation->name;
+                    $newPatientLog->text = 'ลงทะเบียนคิวที่ : Lab';
                     $newPatientLog->user = Auth::user()->userid;
                     $newPatientLog->save();
                 }
@@ -570,8 +574,10 @@ class StationController extends Controller
         
         if($request->input !== 'null'){
             $patient = Patient::whereDate('date', $date)
-                ->where('hn', $request->input)
-                ->orwhere('vn', $request->input)
+                ->where(function ($query) use ($request) {
+                    $query->where('hn', $request->input)
+                        ->orwhere('vn', $request->input);
+                })
                 ->first();
         }else{
             $patient = null;

@@ -20,7 +20,10 @@
                     @if (count($patient->logs) > 0)
                         @foreach ($patient->logs as $log)
                             <div class="flex shaodw mb-3 font-bold hover:bg-blue-100">
-                                <div class="p-3 flex-grow">{{ $log->text }}</div>
+                                <div class="p-3 flex-grow">
+                                    <div>{{ $log->text }}</div>
+                                    <div class="text-xs">USER: {{ $log->user }}</div>
+                                </div>
                                 <div class="p-3">{{ $log->created_at->format('H:i') }}</div>
                             </div>
                         @endforeach
