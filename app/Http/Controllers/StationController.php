@@ -489,7 +489,7 @@ class StationController extends Controller
     function checksuccessTask(Request $request)
     {
         $code = $request->code;
-        $station = Statino::where('code', $code)->first();
+        $station = Station::where('code', $code)->first();
 
         $isSuccess = false;
         if($request->code == 'b12_vitalsign'){
