@@ -120,6 +120,7 @@ class StationController extends Controller
                 ->where('HN', $hn)
                 ->select('VisitDate', 'VN', 'HN', )
                 ->first();
+
             if($ssbVN !== null){
                 $ssbInfo = DB::connection('SSB')
                     ->table('HNPAT_INFO')
@@ -157,6 +158,7 @@ class StationController extends Controller
             $task->patient_id = $patient->id;
             $task->date = date('Y-m-d');
             $task->hn = $patient->hn;
+            $task->vn = $patient->vn;
             $task->code = $station->code;
         }
         $task->success = null;
