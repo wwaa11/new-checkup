@@ -45,6 +45,7 @@ class ProcessCreateTask implements ShouldQueue
             ->whereDate('HIS_CHECKUP_STATION_DETAIL.Visitdate', date('Y-m-d'))
             ->where('HIS_CHKUP_HEADER.Clinic', '1800')
             ->where('HIS_CHKUP_HEADER.ComputerLocation', 'LIKE', 'B12%')
+            ->whereIn('HIS_CHECKUP_STATION_DETAIL.StationCode', ['01', '011'])
             ->select(
                 'HIS_CHECKUP_STATION_DETAIL.Visitdate',
                 'HIS_CHECKUP_STATION_DETAIL.HN',
@@ -55,131 +56,86 @@ class ProcessCreateTask implements ShouldQueue
                 'HIS_CHECKUP_STATION_DETAIL.StationCode',
                 'HIS_CHECKUP_STATION_DETAIL.FacilityRequestNo',
             )
+            ->orderBy('HIS_CHECKUP_STATION_DETAIL.VN', 'ASC')
+            ->orderBy('HIS_CHECKUP_STATION_DETAIL.StationCode', 'ASC')
             ->get();
-        $patients = Patient::where('date', date('Y-m-d'))->get();
-        $checkHN = [];
-        foreach ($newDatas as $data) {
-            try {
-                if(!in_array($data->HN, $checkHN)) {
-                    $search = collect($patients)->where('hn', $data->HN)->first();
-                    if($search == null){
-                        $patient = new Patient;
-                        $patient->date = date('Y-m-d');
-                        $patient->hn = $data->HN;
-                        $patient->name = $data->FirstName.' '.$data->LastName;
-                        $patient->lang = ($data->EnglishResult == 0) ? 'th' : 'en';
-                        $patient->vn = $data->VN;
-                        $patient->save();
 
+        foreach ($newDatas as $data) {
+            $patient = Patient::where('date', date('Y-m-d'))->where('hn', $data->HN)->first();
+            if($patient == null){
+                $patient = new Patient;
+                $patient->date = date('Y-m-d');
+                $patient->hn = $data->HN;
+                $patient->name = $data->FirstName.' '.$data->LastName;
+                $patient->lang = ($data->EnglishResult == 0) ? 'th' : 'en';
+                $patient->vn = $data->VN;
+                $patient->save();
+
+                $newPatientLog = new Patientlogs;
+                $newPatientLog->patient_id = $patient->id;
+                $newPatientLog->date = date('Y-m-d');
+                $newPatientLog->hn = $data->HN;
+                $newPatientLog->text = 'นำเข้าข้อมูลผู้ป่วยจาก NewUI';
+                $newPatientLog->user = 'service';
+                $newPatientLog->save();
+            }else{
+                $patient = Patient::where('date', date('Y-m-d'))->where('hn', $data->HN)->first();
+            }
+
+            $code = false;
+            switch ($data->StationCode) {
+                case '01':
+                    $code = 'b12_vitalsign';
+                    $text = 'Vital Sign';
+                    break;
+                case '011':
+                    $code = 'b12_lab';
+                    $text = 'Lab';
+                    break;
+                default:
+                    $code = 'skip'; 
+                    break;
+            }
+
+            if($code !== 'skip'){
+                $task = Patienttask::where('hn', $data->HN)
+                    ->where('date', date('Y-m-d'))
+                    ->where('code',$code)
+                    ->first();
+
+                if($task == null){
+                    $newTask = new Patienttask;
+                    $newTask->patient_id = $patient->id;
+                    $newTask->date = date('Y-m-d');
+                    $newTask->hn = $data->HN;
+                    $newTask->vn = $data->VN;
+                    $newTask->code = $code;
+                    if($code == 'b12_vitalsign'){
+                        $newTask->assign = date('Y-m-d H:i:s');
+                    }
+                    if($code == 'b12_lab'){
+                        $newTask->memo1 = $data->FacilityRequestNo;
+                    }
+                    $newTask->save();
+
+                    $newPatientLog = new Patientlogs;
+                    $newPatientLog->patient_id = $patient->id;
+                    $newPatientLog->date = date('Y-m-d');
+                    $newPatientLog->hn = $data->HN;
+                    $newPatientLog->text = 'สร้างรายการ Check UP : '.$text;
+                    $newPatientLog->user = 'service';
+                    $newPatientLog->save();
+
+                    if($code == 'b12_vitalsign'){
                         $newPatientLog = new Patientlogs;
                         $newPatientLog->patient_id = $patient->id;
                         $newPatientLog->date = date('Y-m-d');
                         $newPatientLog->hn = $data->HN;
-                        $newPatientLog->text = 'นำเข้าข้อมูลผู้ป่วยจาก NewUI';
+                        $newPatientLog->text = 'ลงทะเบียนคิวที่ : วัดความดัน';
                         $newPatientLog->user = 'service';
                         $newPatientLog->save();
-                    }else{
-                        $patient = Patient::where('date', date('Y-m-d'))->where('hn', $data->HN)->whereNull('vn')->first();
-                        if( $patient !== null ){
-                            $patient->vn = $data->VN;
-                            $patient->pre_vn_finish = 1;
-                            $patient->save();
-
-                            $newPatientLog = new Patientlogs;
-                            $newPatientLog->patient_id = $patient->id;
-                            $newPatientLog->date = date('Y-m-d');
-                            $newPatientLog->hn = $data->HN;
-                            $newPatientLog->text = 'เพิ่มข้อมูล VN จาก NewUI';
-                            $newPatientLog->user = 'service';
-                            $newPatientLog->save();
-                        }else{
-                            $patient = Patient::where('date', date('Y-m-d'))->where('hn', $data->HN)->first();
-                        }
-                    }
-
-                    switch ($data->StationCode) {
-                        case '01':
-                            $code = 'b12_vitalsign';
-                            $text = 'Vital Sign';
-                            break;
-                        case '011':
-                            $code = 'b12_lab';
-                            $text = 'Lab';
-                            break;
-                        // case '02':
-                        //     $code = 'b12_ekg';
-                        //     break;
-                        // case '03':
-                        //     $code = 'b12_abi';
-                        //     break;
-                        // case '04':
-                        //     $code = 'b12_estecho';
-                        //     break;
-                        // case '06':
-                        //     $code = 'b12_chest';
-                        //     break;
-                        // case '07':
-                        //     $code = 'b12_ultrasound';
-                        //     break;
-                        // case '08':
-                        //     $code = 'b12_mammogram';
-                        //     break;
-                        // case '09':
-                        //     $code = 'b12_boneden';
-                        //     break;
-                        // case '10':
-                        //     $code = 'b12_gny';
-                        //     break;
-                        default:
-                            $code = false;
-                            break;
-                    }
-                    if($code){
-                        $task = Patienttask::where('hn', $data->HN)
-                            ->where('date', date('Y-m-d'))
-                            ->where('code',$code)
-                            ->first();
-                        if($task == null){
-                            $newTask = new Patienttask;
-                            $newTask->patient_id = $patient->id;
-                            $newTask->date = date('Y-m-d');
-                            $newTask->hn = $data->HN;
-                            $newTask->vn = $data->VN;
-                            $newTask->code = $code;
-                            if($code == 'b12_vitalsign'){
-                                $newTask->assign = date('Y-m-d H:i:s');
-                            }
-                            if($code == 'b12_lab'){
-                                $newTask->memo1 = $data->FacilityRequestNo;
-                            }
-                            $newTask->save();
-
-                            $newPatientLog = new Patientlogs;
-                            $newPatientLog->patient_id = $patient->id;
-                            $newPatientLog->date = date('Y-m-d');
-                            $newPatientLog->hn = $data->HN;
-                            $newPatientLog->text = 'สร้างรายการ Check UP : '.$text;
-                            $newPatientLog->user = 'service';
-                            $newPatientLog->save();
-
-                            if($code == 'b12_vitalsign'){
-                                $newPatientLog = new Patientlogs;
-                                $newPatientLog->patient_id = $patient->id;
-                                $newPatientLog->date = date('Y-m-d');
-                                $newPatientLog->hn = $data->HN;
-                                $newPatientLog->text = 'ลงทะเบียนคิวที่ : วัดความดัน';
-                                $newPatientLog->user = 'service';
-                                $newPatientLog->save();
-                            }
-                        }
                     }
                 }
-                $checkHN[] = $data->HN;
-            } 
-            catch (\Throwable $th) {
-                Log::channel('debug')->notice($data->HN . ' err Data.');
-                Log::channel('debug')->notice($patient);
-                Log::channel('debug')->notice($th);
             }
         }
 

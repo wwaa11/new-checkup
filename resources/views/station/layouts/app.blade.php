@@ -42,6 +42,12 @@
     </div>
 </body>
 <script>
+    $(document).ready(function() {
+        setTimeout(function() {
+            location.reload();
+        }, 1000 * 60 * 60 * 3);
+    });
+
     async function logoutFn() {
         const formData = new FormData();
         const res = await axios.post("{{ env('APP_URL') }}/unauth", formData);

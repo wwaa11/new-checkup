@@ -33,12 +33,3 @@
         </div>
     </div>
 @endsection
-@section('scripts')
-    <script>
-        $(document).ready(function() {
-            setTimeout(function() {
-                location.reload();
-            }, 1000 * 60 * 60 * 3);
-        });
-    </script>
-@endsection

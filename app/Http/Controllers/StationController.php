@@ -18,7 +18,7 @@ class StationController extends Controller
 {
     function test()
     {
-        
+       
         return response()->json('index new check up page '.date('Y-m-d H:i:s') , 200);
     }
     function Auth()
