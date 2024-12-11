@@ -347,6 +347,12 @@ class StationController extends Controller
         
         return response()->json(['status' => 'success'], 200);
     }
+    function callTaskAgain(Request $request)
+    {
+        
+
+        return response()->json(['status' => 'success'], 200);
+    }
     function holdTask(Request $request)
     {
         $substation = Substation::find($request->substation_id);
