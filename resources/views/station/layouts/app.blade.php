@@ -18,7 +18,7 @@
     <div class="w-full flex flex-row p-3 shadow-blue-300 shadow fixed top-0 left-0 right-0 h-24 bg-white">
         <div class="flex-shrink cursor-pointer">
             <img src="{{ asset('images/Side Logo.png') }}" class="h-12" alt="logo">
-            <span class="font-bold">B12 Check-UP</span>
+            <span class="font-bold">B12 CHECK UP</span>
         </div>
         <ul class="flex-grow flex p-3 gap-6 font-bold">
             <li class="ps-12 p-3">

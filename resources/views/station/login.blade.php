@@ -18,6 +18,7 @@
 <body class="font-sans antialiased">
     <div class="w-1/3 m-auto mt-12">
         <img src="{{ asset('images/Vertical Logo.png') }}" alt="logo" class="w-60 m-auto">
+        <div class="text-center text-3xl font-bold p-6">B12 CHECK UP</div>
         <input placeholder="รหัสพนักงาน" id="userid" class="w-full p-3 border border=gray-200 my-3" type="text">
         <input placeholder="รหัสเข้าคอมพิวเตอร์" id="password" class="w-full p-3 border border=gray-200 my-3"
             type="password">

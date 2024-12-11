@@ -75,7 +75,7 @@ class ProcessCreateTask implements ShouldQueue
                         $newPatientLog->patient_id = $patient->id;
                         $newPatientLog->date = date('Y-m-d');
                         $newPatientLog->hn = $data->HN;
-                        $newPatientLog->text = 'นำเข้าขูลผู้ป่วยจาก NewUI';
+                        $newPatientLog->text = 'นำเข้าข้อมูลผู้ป่วยจาก NewUI';
                         $newPatientLog->user = 'service';
                         $newPatientLog->save();
                     }else{

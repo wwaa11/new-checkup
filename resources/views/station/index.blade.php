@@ -9,8 +9,13 @@
                 <div class="shadow-md p-6 font-bold">
                     <div class="text-center w-full text-2xl p-3">{{ $key }}</div>
                     @if ($key !== 'Register')
-                        <a href="{{ env('APP_URL') }}/station/register/{{ $station[0]['station_id'] }}">
+                        <a href="{{ env('APP_URL') }}/station/register/{{ $station[0]['station_id'] }}" target="_blank">
                             <div class="p-3 text-center rounded-md border-2 mb-3 border-yellow-300">Register</div>
+                        </a>
+                    @endif
+                    @if ($key == 'ห้องเจาะเลือด')
+                        <a href="{{ env('APP_URL') }}/station/lab/count" target="_blank">
+                            <div class="p-3 text-center rounded-md border-2 mb-3 border-red-300">Patient Counts</div>
                         </a>
                     @endif
                     <div class="grid @if (count($station) > 1) grid-cols-2 @endif gap-3">
@@ -29,5 +34,11 @@
     </div>
 @endsection
 @section('scripts')
-    <script></script>
+    <script>
+        $(document).ready(function() {
+            setTimeout(function() {
+                location.reload();
+            }, 1000 * 60 * 60 * 3);
+        });
+    </script>
 @endsection

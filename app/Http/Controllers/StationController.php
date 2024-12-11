@@ -120,6 +120,7 @@ class StationController extends Controller
                 ->where('HN', $hn)
                 ->select('VisitDate', 'VN', 'HN', )
                 ->first();
+
             if($ssbVN !== null){
                 $ssbInfo = DB::connection('SSB')
                     ->table('HNPAT_INFO')
@@ -157,10 +158,12 @@ class StationController extends Controller
             $task->patient_id = $patient->id;
             $task->date = date('Y-m-d');
             $task->hn = $patient->hn;
+            $task->vn = $patient->vn;
             $task->code = $station->code;
         }
-        $task->type = 'process';
+        $task->success = null;
         $task->assign = date('Y-m-d H:i:s');
+        $task->type = 'process';
         $task->save();
 
         $newPatientLog = new Patientlogs;
@@ -596,5 +599,21 @@ class StationController extends Controller
         }
 
         return response()->json(['status' => 'success', 'substation' => $substation, 'data' => $data], 200);
+    }
+    function labCount()
+    {
+        $tasks = Patienttask::join('patients', 'patients.id','patienttasks.patient_id')
+            ->whereDate('patients.date', date('Y-m-d'))
+            ->where('patienttasks.code', 'b12_lab')
+            ->whereNotNull('patienttasks.success')
+            ->orderBy('patienttasks.success','asc')
+            ->select(
+                'patients.hn',
+                'patients.vn',
+                'patients.name',
+                )
+            ->get();
+
+        return view('station.labcount')->with(compact('tasks'));
     }
 }

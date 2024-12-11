@@ -66,7 +66,7 @@
         <div class="grid grid-cols-3 text-center gap-3 text-white m-3">
             <div class="col-span-2">
                 <div class="colorChangeBG rounded p-3 text-3xl">คิวถัดไป / Next Queqe</div>
-                <div class="grid grid-cols-4" id="process">
+                <div class="grid grid-rows-4 grid-flow-col" id="process">
 
                 </div>
             </div>
@@ -82,7 +82,9 @@
 <script>
     $(document).ready(function() {
         startTime()
-        getList()
+        setTimeout(function() {
+            getList()
+        }, 1000 * 20);
     });
 
     function checkTime(i) {
@@ -133,16 +135,22 @@
             process = res.data.data.process
             processHtml = ''
             for (let index = 0; index < res.data.data.process.length; index++) {
-                processHtml = processHtml +
-                    '<div class="text-6xl colorChangeText p-6 font-bold shadow-lg m-3">' + process[index] +
-                    '</div>'
+                if (index < 20) {
+                    processHtml = processHtml +
+                        '<div class="text-6xl colorChangeText p-6 font-bold shadow-lg m-3">' + process[
+                            index] +
+                        '</div>'
+                }
             }
             $('#process').html(processHtml)
             wait = res.data.data.wait
             waitHtml = ''
             for (let index = 0; index < res.data.data.wait.length; index++) {
-                waitHtml = waitHtml + '<div class="text-6xl colorChangeText p-6 font-bold shadow-lg m-3">' +
-                    wait[index] + '</div>'
+                if (index < 10) {
+                    waitHtml = waitHtml +
+                        '<div class="text-6xl colorChangeText p-6 font-bold shadow-lg m-3">' +
+                        wait[index] + '</div>'
+                }
             }
             $('#wait').html(waitHtml)
         })
