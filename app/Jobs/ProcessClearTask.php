@@ -57,16 +57,9 @@ class ProcessClearTask implements ShouldQueue
                 }
             } 
             else if($task->code == 'b12_lab'){
-                $getLabReq = DB::connection('NewUI')
-                    ->table("HIS_CHECKUP_STATION_DETAIL")
-                    ->whereDate('VisitDate', date('Y-m-d'))
-                    ->where('VN', $task->vn)
-                    ->where('StationCode', '011')
-                    ->first();
-
                 $blood = DB::connection('SSB')
                     ->table('HNLABREQ_HEADER')
-                    ->where('RequestNo', $getLabReq->FacilityRequestNo)
+                    ->where('RequestNo', $task->memo1)
                     ->first();
 
                 if($blood !== null && $blood->SpecimenReceiveDateTime !== null){
