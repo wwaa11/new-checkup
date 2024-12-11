@@ -69,25 +69,17 @@
                 </div>
             </div>
             <div class="flex gap-3">
-                <table class="w-full border border-collapse mt-6 text-center flex-grow">
-                    <thead>
-                        <tr>
-                            <th class="p-3 bg-gray-400" colspan="3">All Patient</th>
-                        </tr>
-                        <tr>
-                            <th class="p-2 border"></th>
-                            <th class="p-2 border">HN</th>
-                            <th class="p-2 border">Name</th>
-                        </tr>
-                    </thead>
-                    <tbody id="alltask">
-                        <tr>
-                            <td class="p-2 border"></td>
-                            <td class="p-2 border">Please Wait...</td>
-                            <td class="p-2 border">Please Wait...</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="w-full mt-6 text-center flex-grow">
+                    <div class="rounded">
+                        <div class="p-3 bg-gray-600 text-white ">Waiting for Register</div>
+                        <hr>
+                        <div class="grid grid-cols-2 p-3 shadow">
+                            <div>HN</div>
+                            <div>Name</div>
+                        </div>
+                    </div>
+                    <div id="alltask"></div>
+                </div>
                 @if ($substation->station->code == 'b12_lab')
                     <div class="w-full mt-6 text-center flex-grow">
                         <div class="rounded">
@@ -258,13 +250,12 @@
                 setHtml = '';
                 var index =
                     tasks.forEach(function(val, i) {
-                        setHtml = setHtml + '<tr>';
-                        setHtml = setHtml + '<td class="p-2 border">' + (i + 1) + '</td>';
-                        setHtml = setHtml + '<td class="p-2 border">' + val.hn +
-                            '<div class="text-blue-600">(' + val.vn + ')</div>' + '</td>';
-
-                        setHtml = setHtml + '<td class="p-2 border">' + val.name + '</td>';
-                        setHtml = setHtml + '</tr>';
+                        setHtml = setHtml + '<div class="grid grid-cols-2 shadow mb-2">';
+                        setHtml = setHtml + '<div class="p-2 ">' + val.hn +
+                            ' <div class="text-blue-600">(' + val.vn +
+                            ') </div>' + '</div>'
+                        setHtml = setHtml + '<div class="p-2 ">' + val.name + '</div>'
+                        setHtml = setHtml + '</div>'
                     })
                 $('#alltask').html(setHtml)
             })

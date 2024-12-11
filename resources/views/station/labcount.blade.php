@@ -8,13 +8,15 @@
         <div class="rounded p-3 mt-3">
             <table class="table w-full border">
                 <thead class="border">
+                    <th class="p-3 border">#</th>
                     <th class="p-3 border">HN</th>
                     <th class="p-3 border">VN</th>
                     <th class="p-3 border">Name</th>
                 </thead>
                 <tbody>
-                    @foreach ($tasks as $item)
-                        <tr>
+                    @foreach ($tasks as $i => $item)
+                        <tr class="text-center">
+                            <td class="p-3 border">{{ $i + 1 }}</td>
                             <td class="p-3 border">{{ $item->hn }}</td>
                             <td class="p-3 border">{{ $item->vn }}</td>
                             <td class="p-3 border">{{ $item->name }}</td>

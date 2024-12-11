@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Jobs\ProcessClearTask;
 use App\Jobs\ProcessCreateTask;
 
 class ServiceController extends Controller
@@ -11,5 +11,6 @@ class ServiceController extends Controller
     function startService()
     {
         ProcessCreateTask::dispatch();
+        ProcessClearTask::dispatch();
     }
 }
