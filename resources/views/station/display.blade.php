@@ -179,7 +179,7 @@
             localStorage.setItem(room + vn + 'call', CallNum + 1);
 
             await playsounds(vn, lang, room, station)
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 500));
             swal.close()
         }
 
