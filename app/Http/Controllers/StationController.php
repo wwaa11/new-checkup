@@ -110,7 +110,10 @@ class StationController extends Controller
         $station = Station::find($request->station_id);
 
         $patient = Patient::whereDate('date', date('Y-m-d'))
-            ->where('hn', $hn)
+            ->where(function ($query) use ($hn) {
+                $query->where('hn', $hn)
+                    ->orwhere('vn', $hn);
+            })
             ->first();
 
         if($patient == null){
@@ -135,7 +138,12 @@ class StationController extends Controller
                 $patient = new Patient;
                 $patient->date = date('Y-m-d');
                 $patient->hn = $ssbInfo->HN;
-                $patient->name = mb_substr($ssbInfo->FirstName,1).' '.mb_substr($ssbInfo->LastName,1);
+                $ssbInfo->FirstName = mb_substr($ssbInfo->FirstName,1);
+                if (str_contains($ssbInfo->FirstName, '\\')) {
+                    $firstName = explode("\\", $ssbInfo->FirstName);
+                    $ssbInfo->FirstName = $firstName[1] . $firstName[0];
+                }
+                $patient->name = $ssbInfo->FirstName.' '.mb_substr($ssbInfo->LastName,1);
                 $patient->lang = ($ssbInfo->NationalityCode == 'THA') ? 'th' : 'en';
                 $patient->vn = $ssbVN->VN;
                 $patient->save();
@@ -499,10 +507,13 @@ class StationController extends Controller
     {
         $code = $request->code;
         $station = Station::where('code', $code)->first();
-
+        $task = Patienttask::whereDate('date', date('Y-m-d'))
+            ->where('vn', $request->vn)
+            ->where('code', $code)
+            ->first();
         $isSuccess = false;
+
         if($request->code == 'b12_vitalsign'){
-            
             $getVS = DB::connection('SSB')
                 ->table("HNOPD_VITALSIGN")
                 ->whereDate('VisitDate', date('Y-m-d'))
@@ -512,19 +523,12 @@ class StationController extends Controller
             if($getVS !== null){
                 $isSuccess = true;
             }
-        }else if($request->code == 'b12_lab'){
-            $getLabReq = DB::connection('NewUI')
-                ->table("HIS_CHECKUP_STATION_DETAIL")
-                ->whereDate('VisitDate', date('Y-m-d'))
-                ->where('VN', $request->vn)
-                ->where('StationCode', '011')
-                ->first();
-
+        }
+        else if($request->code == 'b12_lab'){
             $blood = DB::connection('SSB')
                 ->table('HNLABREQ_HEADER')
-                ->where('RequestNo', $getLabReq->FacilityRequestNo)
+                ->where('RequestNo', $task->memo1)
                 ->first();
-
             if($blood !== null && $blood->SpecimenReceiveDateTime !== null){
                 $isSuccess = true;
             }
@@ -534,11 +538,6 @@ class StationController extends Controller
             $substation = Substation::find($request->substation_id);
             $substation->now = null;
             $substation->save();
-
-            $task = Patienttask::whereDate('date', date('Y-m-d'))
-                ->where('vn', $request->vn)
-                ->where('code', $code)
-                ->first();
 
             $task->type = 'success';
             $task->success = date('Y-m-d H:i:s');

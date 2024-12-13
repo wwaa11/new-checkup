@@ -5,35 +5,35 @@
 @section('body')
     <div class="p-6">
         <div class="flex px-6 gap-3">
-            <div class="flex-shrink p-3 font-bold text-2xl text-gray-600">{{ $substation->name }}</div>
+            <div class="flex-shrink p-3 pt-4 font-bold text-2xl text-gray-600">{{ $substation->name }}</div>
             <div class="flex-grow gap-3 flex">
-                <button class="p-3 rounded border w-24 border-blue-500 text-blue-500 hover:bg-blue-600 hover:text-white"
-                    type="button" onclick="CallFn()">
+                <button class="py-3 rounded border w-32 bg-[#008387] text-white" type="button" onclick="CallFn()">
                     Call New Patient
                 </button>
-                <div class="flex-grow p-3 pt-5 font-bold text-2xl shadow bg-gray-100">
+                <div class="flex-grow p-3 pt-4 font-bold text-2xl shadow bg-gray-100">
                     @if ($patient->enabled)
-                        <div class="grid grid-cols-2 w-full gap-3 text-gray-600">
-                            <div class="text-end">VN: <span class="text-red-600" id="vn">{{ $patient->vn }}</span>
+                        <div class="flex w-full gap-3 text-gray-600">
+                            <div class="text-end flex-shrink">VN:
+                                <span class="text-red-600" id="vn">{{ $patient->vn }}</span>
                             </div>
-                            <div>Name: <span class="text-blue-600">{{ $patient->name }}</span> ( <span class="text-blue-600"
-                                    id="hn">{{ $patient->hn }}</span> )</div>
+                            <div class="flex-grow">Name:
+                                <span class="text-blue-600">{{ $patient->name }}</span>
+                                ( <span class="text-blue-600"id="hn">{{ $patient->hn }}</span> )
+                            </div>
                         </div>
                     @endif
                 </div>
                 @if ($patient->enabled)
-                    <button class="p-3 rounded border w-24 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white"
-                        type="button" onclick="CallSoundFn('{{ $patient->vn }}')">
+                    <button class="py-3 rounded border w-32 bg-pink-600 text-white" type="button"
+                        onclick="CallSoundFn('{{ $patient->vn }}')">
                         Call Sound
                     </button>
-                    <button
-                        class="p-3 rounded border w-24 border-amber-500 text-amber-500 hover:bg-amber-600 hover:text-white"
-                        type="button" onclick="HoldFn('{{ $patient->vn }}')">
+                    <button class="py-3 rounded border w-32 bg-amber-500 text-white" type="button"
+                        onclick="HoldFn('{{ $patient->vn }}')">
                         Hold
                     </button>
-                    <button
-                        class="p-3 rounded border w-24 border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
-                        type="button" onclick="SuccessFn('{{ $patient->vn }}')">
+                    <button class="py-3 rounded border w-32 bg-green-600 text-white" type="button"
+                        onclick="SuccessFn('{{ $patient->vn }}')">
                         Success
                     </button>
                 @endif
@@ -152,7 +152,7 @@
                     setHtml = setHtml + '<div class="p-2 ">' + val.hn +
                         ' <div class="text-blue-600">(' + val.vn +
                         ') </div>' + '</div>'
-                    setHtml = setHtml + '<div class="p-2 ">';
+                    setHtml = setHtml + '<div class="py-2 text-start">';
                     setHtml = setHtml + '<div>' + val.name + '</div>'
                     if (val.reason !== null) {
                         setHtml = setHtml + '<div class="text-red-600 text-start text-xs">' + val
@@ -166,15 +166,15 @@
                     setHtml = setHtml + '</div>'
                     setHtml = setHtml + '<div class="p-2 gap-2 text-center flex">';
                     setHtml = setHtml +
-                        '<button class="bg-white p-3 flex-grow rounded border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white" type="button" onclick="CallFn(\'' +
+                        '<button class="bg-[#008387] w-32 text-white p-3 flex-grow rounded" type="button" onclick="CallFn(\'' +
                         val.vn + '\')">Call</button>'
                     if (type == 'process') {
                         setHtml = setHtml +
-                            '<button class="bg-white p-3 flex-grow rounded border border-amber-500 text-amber-500 hover:bg-amber-600 hover:text-white" type="button" onclick="HoldFn(\'' +
+                            '<button class="bg-amber-500 w-32 text-white flex-grow rounded" type="button" onclick="HoldFn(\'' +
                             val.vn + '\')">Hold</button>'
                     } else if (type == 'wait') {
                         setHtml = setHtml +
-                            '<button class="bg-white p-3 flex-grow rounded border border-red-600 text-red-600 hover:bg-red-600 hover:text-white" type="button" onclick="DeleteFn(\'' +
+                            '<button class="bg-red-600 w-32 text-white p-3 flex-grow rounded" type="button" onclick="DeleteFn(\'' +
                             val.vn + '\')">Delete</button>'
                     }
                     setHtml = setHtml + '</div>';
