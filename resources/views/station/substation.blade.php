@@ -42,7 +42,7 @@
         <div class="w-full p-6">
             <div class="grid grid-cols-2 gap-3">
                 <div class="w-full mt-6 text-center">
-                    <div class="bg-blue-600 text-white rounded">
+                    <div class="bg-[#008387] text-white rounded">
                         <div class="p-3">Waiting...</div>
                         <hr>
                         <div class="grid grid-cols-4 p-3 shadow">
@@ -55,7 +55,7 @@
                     <div class="flex-col" id="waiting"></div>
                 </div>
                 <div class="w-full mt-6 text-center">
-                    <div class="bg-amber-300 rounded">
+                    <div class="bg-[#008387] text-white rounded">
                         <div class="p-3">Holding...</div>
                         <hr>
                         <div class="grid grid-cols-4 p-3 shadow">
@@ -70,8 +70,8 @@
             </div>
             <div class="flex gap-3">
                 <div class="w-full mt-6 text-center flex-grow">
-                    <div class="rounded">
-                        <div class="p-3 bg-gray-600 text-white ">Waiting for Register</div>
+                    <div class="bg-[#008387] text-white rounded">
+                        <div class="p-3">Waiting for Register</div>
                         <hr>
                         <div class="grid grid-cols-2 p-3 shadow">
                             <div>HN</div>
@@ -82,8 +82,8 @@
                 </div>
                 @if ($substation->station->code == 'b12_lab')
                     <div class="w-full mt-6 text-center flex-grow">
-                        <div class="rounded">
-                            <div class="p-3 bg-red-600 text-white ">SSP</div>
+                        <div class="bg-[#008387] text-white rounded">
+                            <div class="p-3">SSP</div>
                             <hr>
                             <div class="grid grid-cols-3 p-3 shadow">
                                 <div>HN</div>
@@ -108,7 +108,7 @@
                 '{{ $substation->station->code }}' == 'b12_lab') {
                 if ('{{ $patient->enabled }}' == 1) {
                     setTimeout(function() {
-                        // checksuccess();
+                        checksuccess();
                     }, 1000 * 10);
                 }
                 if ('{{ $substation->station->code }}' == 'b12_lab') {
@@ -131,7 +131,7 @@
                     console.log(res)
                     setTimeout(function() {
                         checksuccess();
-                    }, 1000 * 10);
+                    }, 1000 * 5);
                 }
             })
         }

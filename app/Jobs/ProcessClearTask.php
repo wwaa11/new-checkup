@@ -104,6 +104,6 @@ class ProcessClearTask implements ShouldQueue
             }
         }
 
-        ProcessClearTask::dispatch()->delay(30);
+        ProcessClearTask::dispatch()->delay(300);
     }
 }

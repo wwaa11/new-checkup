@@ -296,20 +296,29 @@ class StationController extends Controller
                 ->where('vn', $substation->now)
                 ->where('code', $substation->station->code)
                 ->first();
-
-            $now_task->type = 'wait';
-            $now_task->assign = date('Y-m-d H:i:s');
-            $now_task->call = null;
-            $now_task->memo4 = 'เรียกคิวอื่นโดยไม่ได้กด Hold';
-            $now_task->save();
-
-            $newPatientLog = new Patientlogs;
-            $newPatientLog->patient_id = $now_task->patient->id;
-            $newPatientLog->date = date('Y-m-d');
-            $newPatientLog->hn = $now_task->patient->hn;
-            $newPatientLog->text = 'ปรับคิวไปยัง Waiting ที่ : '. $substation->name;
-            $newPatientLog->user = Auth::user()->userid;
-            $newPatientLog->save();
+            if($now_task->type == 'success'){
+                $newPatientLog = new Patientlogs;
+                $newPatientLog->patient_id = $now_task->patient->id;
+                $newPatientLog->date = date('Y-m-d');
+                $newPatientLog->hn = $now_task->patient->hn;
+                $newPatientLog->text = 'ลบคิวออกจาก Call : '. $substation->name;
+                $newPatientLog->user = Auth::user()->userid;
+                $newPatientLog->save();
+            }else{
+                $now_task->type = 'wait';
+                $now_task->assign = date('Y-m-d H:i:s');
+                $now_task->call = null;
+                $now_task->memo4 = 'เรียกคิวอื่นโดยไม่ได้กด Hold';
+                $now_task->save();
+                
+                $newPatientLog = new Patientlogs;
+                $newPatientLog->patient_id = $now_task->patient->id;
+                $newPatientLog->date = date('Y-m-d');
+                $newPatientLog->hn = $now_task->patient->hn;
+                $newPatientLog->text = 'ปรับคิวไปยัง Waiting ที่ : '. $substation->name;
+                $newPatientLog->user = Auth::user()->userid;
+                $newPatientLog->save();
+            }
         }
         $type = ($request->vn == 'undefined') ? false : $request->vn;
         if($type){

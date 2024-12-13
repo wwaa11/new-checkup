@@ -7,7 +7,8 @@
         <div class="text-center font-bold mb-3">Check History</div>
         <div class="flex gap-6">
             <input type="date" class="p-3 border border-blue-600 rounded" value="{{ date('Y-m-d') }}" id="date">
-            <input class="flex-grow p-3 border border-blue-600 rounded" type="text" placeholder="HN, VN" id="search">
+            <input class="flex-grow p-3 border border-blue-600 rounded" type="text" placeholder="HN, VN" id="search"
+                @if ($patient !== null) value="{{ $patient->vn }}" @endif>
             <button class="p-3 border border-blue-600 rounded" onclick="search()">Search</button>
         </div>
         <div class="rounded bg-gray-50 p-3 mt-3">
@@ -22,7 +23,7 @@
                             <div class="flex shaodw mb-3 font-bold hover:bg-blue-100">
                                 <div class="p-3 flex-grow">
                                     <div>{{ $log->text }}</div>
-                                    <div class="text-xs">USER: {{ $log->user }}</div>
+                                    <div class="text-xs text-red-600">USER: {{ $log->user }}</div>
                                 </div>
                                 <div class="p-3">{{ $log->created_at->format('H:i') }}</div>
                             </div>
