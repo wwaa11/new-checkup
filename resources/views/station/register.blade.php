@@ -70,21 +70,23 @@
             }
             var result = await register(hn);
 
-            if (result == 'success') {
+            if (result[0] == 'success') {
                 Swal.fire({
                     icon: 'info',
-                    title: 'Success Add : ' + hn,
+                    title: 'Success!',
+                    html: '<div class="text-2xl text-blue-600">HN : ' + hn + '</div>' +
+                        '<div class="text-2xl text-blue-600">Name : ' + result[1].name + '</div>',
                     confirmButtonColor: 'green',
-                    confirmButtonText: 'SUCCESS!',
+                    confirmButtonText: 'Confirm!',
                     showCancelButton: false,
                 })
             } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error Add : ' + hn,
-                    text: result,
+                    text: result[1],
                     confirmButtonColor: 'red',
-                    confirmButtonText: 'confirm!',
+                    confirmButtonText: 'Confirm!',
                     showCancelButton: false,
                 })
             }
@@ -97,9 +99,9 @@
             formData.append('station_id', '{{ $station->id }}');
             result = await axios.post("{{ env('APP_URL') }}/station/register", formData).then((res) => {
                 if (res.data.status == 'success') {
-                    return 'success'
+                    return ['success', res.data.patient]
                 }
-                return res.data.text
+                return ['err', res.data.text]
             })
 
             return result

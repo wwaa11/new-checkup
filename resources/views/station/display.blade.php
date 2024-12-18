@@ -98,7 +98,7 @@
                     display = '-'
                 } else {
                     display = sub[index]['now']
-                    if (sub[index]['call'] !== null && sub[index]['call'] < 3) {
+                    if (sub[index]['call'] !== null && sub[index]['call'] < 2) {
                         callArr.push(sub[index]['id'])
                     }
                 }
@@ -414,6 +414,15 @@
                     return room5;
             }
         })(room);
+
+        await playAudio(audioin)
+        await playAudio(num1)
+        await playAudio(num2)
+        await playAudio(num3)
+        await playAudio(num4)
+        await playAudio(station_name)
+        await playAudio(roomNum)
+        await playAudio(audioout)
 
         await playAudio(audioin)
         await playAudio(num1)

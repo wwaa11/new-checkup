@@ -185,7 +185,7 @@ class StationController extends Controller
         $newPatientLog->user = Auth::user()->userid;
         $newPatientLog->save();
 
-        return response()->json(['status'=>'success'],200);
+        return response()->json(['status'=>'success', 'patient' => $patient],200);
     }
     function getTask(Request $request)
     {
