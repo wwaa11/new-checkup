@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Station @yield('station')</title>
+    <title>Services</title>
     <link rel="shortcut icon" href="{{ asset('images/Logo.ico') }}">
     <script src="{{ asset('js/axios.min.js') }}"></script>
     <script src="{{ asset('js/jquery-3.7.1.slim.js') }}"></script>
@@ -15,26 +15,33 @@
 </head>
 
 <body class="font-sans antialiased">
-    <div class="h-24"></div>
-    <div class="w-full md:w-11/12 m-auto">
+    <div class="w-full md:w-11/12 m-auto p-6">
         <div class="text-2xl mb-3 text-center font-bold">Service Stats : <span id="result">30</span>
         </div>
-        <div class="w-ful">
+        <div class="w-ful mb-3">
             @foreach ($datas as $item)
                 <div class="p-3 mb-3 border rounded shadow">
+                    <div class="mt-3 text-end">
+                        <button onclick="deleteFn('{{ $item['id'] }}')"
+                            class="text-red-600 p-3 border border-red-600 rounded text-center font-bold float-end">Delete!</button>
+                    </div>
                     <div>ID : {{ $item['id'] }}</div>
-                    <div>JOB : {{ $item['name'] }}</div>
+                    <div
+                        class="font-bold @if ($item['type'] == '1') text-orange-600 @elseif($item['type'] == '2') text-red-600 @endif">
+                        JOB : {{ $item['name'] }}</div>
                     <div>Date : {{ $item['create'] }}</div>
                 </div>
             @endforeach
         </div>
-        <div class="flex gap-6 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full my-3">
             <button onclick="createServices()"
                 class="font-bold flex-grow border rounded border-red-600 p-6 text-red-600">Run
                 Create</button>
             <button onclick="clearServices()"
-                class="font-bold flex-grow border rounded border-red-600 p-6 text-red-600">Run
+                class="font-bold flex-grow border rounded border-orange-600 p-6 text-orange-600">Run
                 Clear</button>
+            <button onclick="messageSend()"
+                class="font-bold flex-grow border rounded border-green-600 p-6 text-green-600">Message Test</button>
         </div>
     </div>
 </body>
@@ -52,14 +59,60 @@
     }
 
     async function createServices() {
-        await axios.post("{{ env('APP_URL') }}/dispatchCreate").then((res) => {
-            location.reload();
+        const alert = await Swal.fire({
+            icon: 'warning',
+            title: 'Confirm : Start Create',
+            confirmButtonColor: 'red',
+            confirmButtonText: 'Start!',
+            showCancelButton: true,
         })
+        if (alert.isConfirmed) {
+            await axios.post("{{ env('APP_URL') }}/dispatchCreate").then((res) => {
+                location.reload();
+            })
+        }
     }
 
     async function clearServices() {
-        await axios.post("{{ env('APP_URL') }}/dispatchClear").then((res) => {
-            location.reload();
+        const alert = await Swal.fire({
+            icon: 'warning',
+            title: 'Confirm : Start Clear',
+            confirmButtonColor: 'orange',
+            confirmButtonText: 'Start!',
+            showCancelButton: true,
+        })
+        if (alert.isConfirmed) {
+            await axios.post("{{ env('APP_URL') }}/dispatchClear").then((res) => {
+                location.reload();
+            })
+        }
+    }
+
+    async function deleteFn(id) {
+        const alert = await Swal.fire({
+            icon: 'warning',
+            title: 'Confirm : Delete Create',
+            confirmButtonColor: 'red',
+            confirmButtonText: 'Delete!',
+            showCancelButton: true,
+        })
+        if (alert.isConfirmed) {
+            const formData = new FormData();
+            formData.append('id', id);
+            await axios.post("{{ env('APP_URL') }}/dispatchDelete", formData).then((res) => {
+                location.reload();
+            })
+        }
+    }
+
+    async function messageSend() {
+        await axios.post("{{ env('APP_URL') }}/LineMessageCheck").then((res) => {
+            Swal.fire({
+                icon: 'info',
+                title: 'Message send!',
+                confirmButtonColor: 'green',
+                confirmButtonText: 'confirm',
+            })
         })
     }
 </script>

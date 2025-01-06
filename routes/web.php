@@ -12,6 +12,8 @@ Route::get('/', [ServiceController::class, 'test']);
 Route::get('/serviceStart', [ServiceController::class, 'startService']);
 Route::post('/dispatchCreate', [ServiceController::class, 'dispatchCreate']);
 Route::post('/dispatchClear', [ServiceController::class, 'dispatchClear']);
+Route::post('/dispatchDelete', [ServiceController::class, 'dispatchDelete']);
+Route::post('/LineMessageCheck', [ServiceController::class, 'LineMessageCheck']);
 
 Route::get('/auth', [StationController::class, 'Auth']);
 Route::post('/authcheck', [StationController::class, 'AuthCheck']);

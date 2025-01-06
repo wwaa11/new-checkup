@@ -157,12 +157,24 @@ class ProcessCreateTask implements ShouldQueue
         CURLOPT_POSTFIELDS =>'{
             "to": "U3d7ba4f0386437906a68612c1cce5eba",
             "messages":[
-                    {
-                        "type":"text",
-                        "text":"Error API : run https://pr9webhub.praram9.com/checkup/serviceStart"
+                {
+                    "type":"text",
+                    "text":"Services Error",
+                    "quickReply": {
+                        "items": [
+                        {
+                            "type": "action",
+                            "action": {
+                                "type": "uri",
+                                "label": "ServicesPages!!!",
+                                "uri": "https://pr9webhub.praram9.com/checkup/serviceStart"
+                            }
+                        }
+                        ]
                     }
-                ]
-            }',
+                }
+            ]
+        }',
         CURLOPT_HTTPHEADER => array(
             'Authorization: Bearer '.env('LINE_Token').'','Content-Type: application/json'
         ),
