@@ -25,7 +25,27 @@ class ServiceController extends Controller
     }
     function startService()
     {
+        $jobs = DB::table('jobs')->get();
+        $datas = [];
+        foreach($jobs as $data){
+            $info = json_decode($data->payload);
+            $datas[] = [
+                'id' => $data->id,
+                'name' => $info->displayName,
+                'create' => date('d-m-Y H:i:s', $data->created_at),
+            ];
+        }
+
+        return view('services')->with(compact('datas'));
+    }
+    function dispatchCreate()
+    {
         ProcessCreateTask::dispatch();
+        return response()->json('success', 200);
+    }
+    function dispatchClear()
+    {
         ProcessClearTask::dispatch();
+        return response()->json('success', 200);
     }
 }

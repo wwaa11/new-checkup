@@ -8,7 +8,10 @@ use App\Http\Middleware\pr9Auth;
 
 Route::get('/', [ServiceController::class, 'test']);
 
+
 Route::get('/serviceStart', [ServiceController::class, 'startService']);
+Route::post('/dispatchCreate', [ServiceController::class, 'dispatchCreate']);
+Route::post('/dispatchClear', [ServiceController::class, 'dispatchClear']);
 
 Route::get('/auth', [StationController::class, 'Auth']);
 Route::post('/authcheck', [StationController::class, 'AuthCheck']);

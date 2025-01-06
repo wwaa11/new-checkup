@@ -9,16 +9,13 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use DB;
+use Throwable;
 
 class ProcessCreateTask implements ShouldQueue
 {
     use Queueable;
-    // public $tries = 5;
-
-    public function backoff(): array
-    {
-        return [30, 60, 600];
-    }
+    public $tries = 50;
+    public $backoff = 60;
 
     public function middleware(): array
     {
@@ -143,5 +140,34 @@ class ProcessCreateTask implements ShouldQueue
             ProcessCreateTask::dispatch()->delay(60 * 30);
         }
 
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => 'https://api.line.me/v2/bot/message/push',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS =>'{
+            "to": "U3d7ba4f0386437906a68612c1cce5eba",
+            "messages":[
+                    {
+                        "type":"text",
+                        "text":"Error API : run https://pr9webhub.praram9.com/checkup/serviceStart"
+                    }
+                ]
+            }',
+        CURLOPT_HTTPHEADER => array(
+            'Authorization: Bearer '.env('LINE_Token').'','Content-Type: application/json'
+        ),
+        ));
+        $response = curl_exec($curl);
+        curl_close($curl);
     }
 }
