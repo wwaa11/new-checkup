@@ -237,6 +237,14 @@ class StationController extends Controller
         foreach ($changeTask as $task) {
             $getssp = collect($ALLgetssp)->where('HN', $task->hn)->where('RemarksMemo', 'like', "ssp");
             if (count($getssp) > 0) {
+                $newPatientLog = new Patientlogs;
+                $newPatientLog->patient_id = $task->patient_id;
+                $newPatientLog->date = date('Y-m-d');
+                $newPatientLog->hn = $task->hn;
+                $newPatientLog->text = 'Set SSP';
+                $newPatientLog->user = 'service';
+                $newPatientLog->save();
+
                 $task->memo5 = 1;
                 $task->save();
             }

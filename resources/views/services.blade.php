@@ -26,9 +26,11 @@
                             class="text-red-600 p-3 border border-red-600 rounded text-center font-bold float-end">Delete!</button>
                     </div>
                     <div>ID : {{ $item['id'] }}</div>
-                    <div
-                        class="font-bold @if ($item['type'] == '1') text-orange-600 @elseif($item['type'] == '2') text-red-600 @endif">
-                        JOB : {{ $item['name'] }}</div>
+                    @if ($item['type'] == '1')
+                        <div class="font-bold text-orange-600"> JOB : {{ $item['name'] }}</div>
+                    @elseif($item['type'] == '2')
+                        <div class="font-bold text-red-600"> JOB : {{ $item['name'] }}</div>
+                    @endif
                     <div>Date : {{ $item['create'] }}</div>
                 </div>
             @endforeach
