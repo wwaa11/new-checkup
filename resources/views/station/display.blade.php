@@ -65,7 +65,7 @@
         </div>
         <div class="grid grid-cols-3 text-center gap-3 text-white m-3">
             <div class="col-span-2">
-                <div class="colorChangeBG rounded p-3 text-3xl">คิวถัดไป / Next Queqe</div>
+                <div class="colorChangeBG rounded p-3 text-3xl">คิวถัดไป / Next Queue</div>
                 <div class="grid grid-rows-4 grid-flow-col" id="process">
 
                 </div>
