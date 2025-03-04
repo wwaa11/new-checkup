@@ -13,6 +13,7 @@ use App\Models\Substation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use DB;
+use Exception;
 
 class StationController extends Controller
 {
@@ -57,6 +58,59 @@ class StationController extends Controller
 
     }
     
+    function sendNotiLine($hn, $vn, $location, $Fullname)
+    {
+        if (strpos($Fullname, ' ') !== false) {
+            $name = explode(' ', $Fullname);
+            $first = $name[0];
+            $last = $name[1];
+        } else {
+            $first = $Fullname;
+            $last = '';
+        }
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => env('LINE_Stage') . 'api/v1/esp-queue-api/notification',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => '{
+                "hn_no": "' . $hn . '",
+                "vh_no": "' . $vn . '",
+                "queue_status": "start",
+                "notification_details": [
+                    {
+                        "lang_type":"th",
+                        "first_name": "' . $first . '",
+                        "last_name": "' . $last . '",
+                        "station_name": "' . $location . '",
+                        "clinic":"ศูนย์ตรวจสุขภาพ อาคาร B ชั้น 12"
+                    },
+                    {
+                        "lang_type":"en",
+                        "first_name": "' . $first . '",
+                        "last_name": "' . $last . '",
+                        "station_name": "' . $location . '",
+                        "clinic": "Check UP Center building B floor 12"
+                    }
+                ]
+            }',
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'x-token: ' . env('LINE_STAGE_Key') . '',
+            ),
+        ));
+        $response = curl_exec($curl);
+
+        Log::channel('line')->info($hn . '_' . $vn . '_' . $location . '_' . $response);
+    }
     function StationIndex()
     {
         $stations = [];
@@ -368,6 +422,8 @@ class StationController extends Controller
             $newPatientLog->text = 'เรียกคิวที่ : '. $substation->name;
             $newPatientLog->user = Auth::user()->userid;
             $newPatientLog->save();
+
+            $this->sendNotiLine($task->patient->hn, $task->vn, $substation->name, $task->patient->name);
         }
         
         return response()->json(['status' => 'success'], 200);
@@ -392,6 +448,8 @@ class StationController extends Controller
         $newPatientLog->text = 'เรียกคิวที่ : '. $substation->name;
         $newPatientLog->user = Auth::user()->userid;
         $newPatientLog->save();
+
+        $this->sendNotiLine($task->patient->hn, $task->vn, $substation->name, $task->patient->name);
 
         return response()->json(['status' => 'success'], 200);
     }

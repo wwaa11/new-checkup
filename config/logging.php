@@ -135,6 +135,12 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'line' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/lineAPI.log'),
+            'level' => 'debug',
+        ],
+
     ],
 
 ];

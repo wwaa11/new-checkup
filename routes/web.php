@@ -6,7 +6,7 @@ use App\Http\Controllers\StationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\pr9Auth;
 
-Route::get('/', [ServiceController::class, 'test']);
+Route::get('/', [StationController::class, 'test']);
 
 
 Route::get('/serviceStart', [ServiceController::class, 'startService']);
