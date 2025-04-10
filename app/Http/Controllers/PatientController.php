@@ -1,47 +1,46 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Number;
 use App\Models\Patient;
 use App\Models\Patientlogs;
 use App\Models\Patienttask;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
-use DB;
 
 class PatientController extends Controller
 {
     //
-    function verify()
+    public function verify()
     {
 
         return view("patient.index");
     }
-    function verifySearch(Request $request)
+    public function verifySearch(Request $request)
     {
         $findData = Patient::where("date", date('Y-m-d'))
             ->where('pre_vn_finish', true)
-            ->where(function($query) use ($request) {
+            ->where(function ($query) use ($request) {
                 $query->where('request_input', $request->input)
                     ->orWhere('hn', $request->input);
             })
             ->get();
-        if(count($findData) > 0){
+        if (count($findData) > 0) {
             $data = [];
-            foreach($findData as $patient){
+            foreach ($findData as $patient) {
                 $data[] = [
-                    'input' => $request->input,
-                    'type' => 1,
-                    'hn' => $patient->hn,
-                    'name' => $patient->name,
-                    'app' => $patient->app,
+                    'input'    => $request->input,
+                    'type'     => 1,
+                    'hn'       => $patient->hn,
+                    'name'     => $patient->name,
+                    'app'      => $patient->app,
                     'app_time' => $patient->app_time,
-                    'number' => $patient->pre_vn,
-                    'lang' => $patient->lang
+                    'number'   => $patient->pre_vn,
+                    'lang'     => $patient->lang,
                 ];
             }
-        }else{
+        } else {
             // Search HIS Data
             $SSB = DB::connection('SSB')
                 ->table('HNPAT_INFO')
@@ -71,93 +70,93 @@ class PatientController extends Controller
                     'HNPAT_INFO.NationalityCode'
                 )
                 ->get();
-            if(count($SSB) > 0){
-                foreach($SSB as $patient){
+            if (count($SSB) > 0) {
+                foreach ($SSB as $patient) {
                     $findData = Patient::where("date", date('Y-m-d'))->whereNotNull('pre_vn')->where('hn', $patient->HN)->first();
-                    if($findData !== null){
+                    if ($findData !== null) {
                         $data[] = [
-                            'input' => $request->input,
-                            'type' => 1,
-                            'hn' => $findData->hn,
-                            'name' => $findData->name,
-                            'app' => $findData->app,
+                            'input'    => $request->input,
+                            'type'     => 1,
+                            'hn'       => $findData->hn,
+                            'name'     => $findData->name,
+                            'app'      => $findData->app,
                             'app_time' => $findData->app_time,
-                            'number' => $findData->pre_vn,
-                            'lang' => $findData->lang
+                            'number'   => $findData->pre_vn,
+                            'lang'     => $findData->lang,
                         ];
-                    }else{
+                    } else {
                         $app = DB::connection('SSB')->table('HNAPPMNT_HEADER')
-                                ->whereDate('HNAPPMNT_HEADER.AppointDateTime', date('Y-m-d'))
-                                ->where('HNAPPMNT_HEADER.Clinic', '1800')
-                                ->where('HNAPPMNT_HEADER.HN', $patient->HN)
-                                ->select(
-                                    'AppointmentNo',
-                                    'AppointDateTime',
-                                    'AppmntProcedureCode1',
-                                    'AppmntProcedureCode2',
-                                    'AppmntProcedureCode3',
-                                    'AppmntProcedureCode4',
-                                    'AppmntProcedureCode5',
-                                    )
-                                ->first();
-                        if($app == null){
+                            ->whereDate('HNAPPMNT_HEADER.AppointDateTime', date('Y-m-d'))
+                            ->where('HNAPPMNT_HEADER.Clinic', '1800')
+                            ->where('HNAPPMNT_HEADER.HN', $patient->HN)
+                            ->select(
+                                'AppointmentNo',
+                                'AppointDateTime',
+                                'AppmntProcedureCode1',
+                                'AppmntProcedureCode2',
+                                'AppmntProcedureCode3',
+                                'AppmntProcedureCode4',
+                                'AppmntProcedureCode5',
+                            )
+                            ->first();
+                        if ($app == null) {
                             $data[] = [
-                                'input' => $request->input,
-                                'type' => 0,
-                                'hn' => $patient->HN,
-                                'name' => mb_substr($patient->FirstName, 1).' '.mb_substr($patient->LastName, 1),
-                                'lang' => ($patient->NationalityCode == 'THA')? 'th' : 'end',
-                                'app' => 'walkin',
+                                'input'    => $request->input,
+                                'type'     => 0,
+                                'hn'       => $patient->HN,
+                                'name'     => mb_substr($patient->FirstName, 1) . ' ' . mb_substr($patient->LastName, 1),
+                                'lang'     => ($patient->NationalityCode == 'THA') ? 'th' : 'end',
+                                'app'      => 'walkin',
                                 'app_time' => date('H:i'),
                             ];
-                        }else{
+                        } else {
                             $followUP = ['A1', 'A2', 'A3', 'A4', 'A7', 'A10', 'AI', 'AB2', 'AB3', 'AG2', 'AG3', 'A31', 'A129'];
-                            if( 
+                            if (
                                 in_array($app->AppmntProcedureCode1, $followUP) ||
                                 in_array($app->AppmntProcedureCode2, $followUP) ||
                                 in_array($app->AppmntProcedureCode3, $followUP) ||
                                 in_array($app->AppmntProcedureCode4, $followUP) ||
                                 in_array($app->AppmntProcedureCode5, $followUP)
-                            ){
+                            ) {
                                 $time = 'U';
-                            }else{
+                            } else {
                                 $time = date('H:i', strtotime($app->AppointDateTime));
                             }
                             $data[] = [
-                                'input' => $request->input,
-                                'type' => 0,
-                                'hn' => $patient->HN,
-                                'name' => mb_substr($patient->FirstName, 1).' '.mb_substr($patient->LastName, 1),
-                                'lang' => ($patient->NationalityCode == 'THA')? 'th' : 'end',
-                                'app' => $app->AppointmentNo,
+                                'input'    => $request->input,
+                                'type'     => 0,
+                                'hn'       => $patient->HN,
+                                'name'     => mb_substr($patient->FirstName, 1) . ' ' . mb_substr($patient->LastName, 1),
+                                'lang'     => ($patient->NationalityCode == 'THA') ? 'th' : 'end',
+                                'app'      => $app->AppointmentNo,
                                 'app_time' => $time,
                             ];
                         }
                     }
 
                 }
-            }else{
-            // Nodata
+            } else {
+                // Nodata
                 $data = [
                     [
-                        'input' => $request->input,
-                        'type' => 0,
-                        'hn' => $request->input,
-                        'name' => 'walkin',
-                        'app' => '',
+                        'input'    => $request->input,
+                        'type'     => 0,
+                        'hn'       => $request->input,
+                        'name'     => 'walkin',
+                        'app'      => '',
                         'app_time' => date('H:i'),
-                        'lang' => 'th'
-                    ]
+                        'lang'     => 'th',
+                    ],
                 ];
             }
         }
 
         return response()->json(['status' => 'success', 'result' => $data], 200);
     }
-    function requestNumber(Request $request)
+    public function requestNumber(Request $request)
     {
         $checkGenerateNumber = Patient::where('date', date('Y-m-d'))->where('request_input', $request->request_input)->where('pre_vn_finish', true)->first();
-        if($checkGenerateNumber !== null){
+        if ($checkGenerateNumber !== null) {
 
             return response()->json(['status' => 'success', 'result' => $checkGenerateNumber->pre_vn], 200);
         }
@@ -165,11 +164,11 @@ class PatientController extends Controller
         $checkAttemp = RateLimiter::attempt(
             $request->hn,
             1,
-            function() use ($request) {
-                if($request->app_time == 'U'){
+            function () use ($request) {
+                if ($request->app_time == 'U') {
                     $type = 'U';
-                }else{
-                    switch (substr($request->app_time, 0,2)) {
+                } else {
+                    switch (substr($request->app_time, 0, 2)) {
                         case '07':
                             $type = 'A';
                             break;
@@ -188,44 +187,47 @@ class PatientController extends Controller
                         case '12':
                             $type = 'H';
                             break;
+                        case '13':
+                            $type = 'V';
+                            break;
                         default:
                             $type = 'M';
                             break;
                     }
                 }
                 $DataNumber = Number::where('date', date('Y-m-d'))->where('type', $type)->lockForUpdate()->first();
-                if($DataNumber == null){
-                    $DataNumber = new Number;
+                if ($DataNumber == null) {
+                    $DataNumber       = new Number;
                     $DataNumber->date = date('Y-m-d');
                     $DataNumber->type = $type;
                     $DataNumber->save();
-        
+
                     $DataNumber = Number::where('date', date('Y-m-d'))->where('type', $type)->lockForUpdate()->first();
                 }
-                $value = $DataNumber->number+1;
+                $value              = $DataNumber->number + 1;
                 $DataNumber->number = $value;
-                $outputNumber = $type . str_pad($value, 3, '0', STR_PAD_LEFT);
+                $outputNumber       = $type . str_pad($value, 3, '0', STR_PAD_LEFT);
                 // New Patient , Logs
-                $newPatient = new Patient;
-                $newPatient->date = date('Y-m-d');
+                $newPatient                = new Patient;
+                $newPatient->date          = date('Y-m-d');
                 $newPatient->request_input = $request->input;
-                $newPatient->name = $request->name;
-                $newPatient->lang = $request->lang;
-                $newPatient->hn = $request->hn;
-                $newPatient->pre_vn = $outputNumber;
-                $newPatient->app =  $request->app;
+                $newPatient->name          = $request->name;
+                $newPatient->lang          = $request->lang;
+                $newPatient->hn            = $request->hn;
+                $newPatient->pre_vn        = $outputNumber;
+                $newPatient->app           = $request->app;
                 $newPatient->pre_vn_finish = true;
 
-                $newPatientLog = new Patientlogs;
+                $newPatientLog       = new Patientlogs;
                 $newPatientLog->date = date('Y-m-d');
-                $newPatientLog->hn =  $request->hn;
-                $newPatientLog->text = 'ลงทะเบียนรับ PreVN : ' . $outputNumber . ' เวลานัด : '. $request->app_time;
+                $newPatientLog->hn   = $request->hn;
+                $newPatientLog->text = 'ลงทะเบียนรับ PreVN : ' . $outputNumber . ' เวลานัด : ' . $request->app_time;
                 $newPatientLog->save();
 
-                $newPatientTask = new Patienttask;
-                $newPatientTask->hn = $request->hn;
+                $newPatientTask         = new Patienttask;
+                $newPatientTask->hn     = $request->hn;
                 $newPatientTask->assign = date('Y-m-d H:i:s');
-                $newPatientTask->memo1 = $type;
+                $newPatientTask->memo1  = $type;
                 switch ($type) {
                     case 'U':
                         $level = 0;
@@ -248,18 +250,21 @@ class PatientController extends Controller
                     case 'H':
                         $level = 6;
                         break;
+                    case 'V':
+                        $level = 7;
+                        break;
                     case 'M':
                         $level = 99;
                         break;
-                    
+
                 }
                 $newPatientTask->memo5 = $level;
-                $newPatientTask->code = 'b12_register';
+                $newPatientTask->code  = 'b12_register';
 
-                $newPatientLog = new Patientlogs;
+                $newPatientLog       = new Patientlogs;
                 $newPatientLog->date = date('Y-m-d');
-                $newPatientLog->hn = $request->hn;
-                $newPatientLog->text = 'ลงทะเบียนคิว Register : '.$outputNumber;
+                $newPatientLog->hn   = $request->hn;
+                $newPatientLog->text = 'ลงทะเบียนคิว Register : ' . $outputNumber;
                 $newPatientLog->save();
 
                 $newPatientTask->save();
@@ -270,28 +275,28 @@ class PatientController extends Controller
             }
         );
 
-        if(!$checkAttemp){
-            
-            return response()->json('too many request :' , 429);
+        if (! $checkAttemp) {
+
+            return response()->json('too many request :', 429);
         }
 
         return response()->json(['status' => 'success', 'result' => $checkAttemp], 200);
     }
-    function checkLocation(Request $request)
+    public function checkLocation(Request $request)
     {
-        
+
     }
-    function smsRequest($hn)
+    public function smsRequest($hn)
     {
         $searchPatient = Patient::where('date', date('Y-m-d'))->where('hn', $hn)->where('pre_vn_finish', true)->first();
-        if($searchPatient !== null){
+        if ($searchPatient !== null) {
             $data = [
-                'hn' => $searchPatient->hn,
+                'hn'   => $searchPatient->hn,
                 'name' => $searchPatient->name,
             ];
-        }else{
+        } else {
             $data = [
-                'hn' => $hn,
+                'hn'   => $hn,
                 'name' => 'NoData wait for HRIS',
             ];
         }
