@@ -138,7 +138,8 @@ return [
         'line' => [
             'driver' => 'daily',
             'path' => storage_path('logs/lineAPI.log'),
-            'level' => 'debug',
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
         ],
 
     ],
