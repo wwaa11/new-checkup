@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace("_", "-", app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Display {{ $stations[0]->name }}</title>
-    <link rel="shortcut icon" href="{{ asset('images/Logo.ico') }}">
-    <script src="{{ asset('js/axios.min.js') }}"></script>
-    <script src="{{ asset('js/jquery-3.7.1.slim.js') }}"></script>
-    <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="shortcut icon" href="{{ asset("images/Logo.ico") }}">
+    <script src="{{ asset("js/axios.min.js") }}"></script>
+    <script src="{{ asset("js/jquery-3.7.1.slim.js") }}"></script>
+    <script src="{{ asset("js/sweetalert2@11.js") }}"></script>
+    @if (file_exists(public_path("build/manifest.json")) || file_exists(public_path("hot")))
+        @vite(["resources/css/app.css", "resources/js/app.js"])
     @endif
 </head>
 <style>
@@ -23,18 +23,18 @@
     }
 </style>
 
-<body class="font-sans antialiased overflow-hidden" auto>
-    <div class="w-full h-screen">
-        <div class="w-full max-h-[13%] shadow-lg mb-2 flex font-bold">
-            <div class="flex-shrink m-3">
-                <img class="h-full p-2" src="{{ asset('images/Side Logo.png') }}" alt="">
+<body class="overflow-hidden font-sans antialiased" auto>
+    <div class="h-screen w-full">
+        <div class="mb-2 flex max-h-[13%] w-full font-bold shadow-lg">
+            <div class="m-3 flex-shrink">
+                <img class="h-full p-2" src="{{ asset("images/Side Logo.png") }}" alt="">
             </div>
-            <div class="flex-grow text-center m-3">
-                <div class="text-3xl colorChangeText">ศูนย์ตรวจสุขภาพ รพ.พระรามเก้า</div>
+            <div class="m-3 flex-grow text-center">
+                <div class="colorChangeText text-3xl">ศูนย์ตรวจสุขภาพ รพ.พระรามเก้า</div>
                 <div class="text-s text-red-800">รพ.พระรามเก้า ยินดีต้อนรับ</div>
                 <div class="text-s text-red-800">Welcome to Praram 9 Hospital</div>
             </div>
-            <div class="flex-shrink flex gap-3 text-3xl p-3 m-3 rounded text-white colorChangeBG">
+            <div class="colorChangeBG m-3 flex flex-shrink gap-3 rounded p-3 text-3xl text-white">
                 <div class="m-auto">
                     <div id="time"></div>
                 </div>
@@ -47,32 +47,30 @@
         <div class="flex">
             @foreach ($stations as $station)
                 <div class="flex-grow">
-                    <div class="flex gap-6 mx-6 my-3">
+                    <div class="mx-6 my-3 flex gap-6">
                         @foreach ($station->substations as $sub)
-                            <div class="flex-grow text-center colorChangeBG rounded text-white">
+                            <div class="colorChangeBG flex-grow rounded text-center text-white">
                                 <div class="p-2">{{ $sub->name }}</div>
                                 <div class="p-3 text-6xl" id="{{ $station->id }}_{{ $sub->id }}">-</div>
-                                <input type="hidden" id="{{ $station->id }}_{{ $sub->id }}code"
-                                    value="{{ $station->code }}">
-                                <input type="hidden" id="{{ $station->id }}_{{ $sub->id }}lang">
-                                <input type="hidden" id="{{ $station->id }}_{{ $sub->id }}station"
-                                    value="{{ preg_replace('/[^0-9]/', '', $sub->name) }}">
+                                <input id="{{ $station->id }}_{{ $sub->id }}code" type="hidden" value="{{ $station->code }}">
+                                <input id="{{ $station->id }}_{{ $sub->id }}lang" type="hidden">
+                                <input id="{{ $station->id }}_{{ $sub->id }}station" type="hidden" value="{{ preg_replace("/[^0-9]/", "", $sub->name) }}">
                             </div>
                         @endforeach
                     </div>
                 </div>
             @endforeach
         </div>
-        <div class="grid grid-cols-3 text-center gap-3 text-white m-3">
+        <div class="m-3 grid grid-cols-3 gap-3 text-center text-white">
             <div class="col-span-2">
-                <div class="colorChangeBG rounded p-3 text-3xl">คิวถัดไป / Next Queue</div>
-                <div class="grid grid-rows-4 grid-flow-col" id="process">
+                <div class="colorChangeBG rounded p-3 text-5xl">คิวถัดไป / Next Queue</div>
+                <div class="grid grid-flow-col grid-rows-4" id="process">
 
                 </div>
             </div>
             <div class="col-span-1">
                 <div class="colorChangeBG rounded p-3 text-3xl">กรุณาติดต่อแผนก {{ $station->name }}</div>
-                <div class="grid grid-rows-4 grid-flow-col" id="wait">
+                <div class="grid grid-flow-col grid-rows-4" id="wait">
 
                 </div>
             </div>
@@ -91,7 +89,7 @@
         const callArr = []
         const formData = new FormData();
         formData.append('station', '{{ $stationid }}');
-        await axios.post("{{ env('APP_URL') }}/display/list", formData).then((res) => {
+        await axios.post("{{ env("APP_URL") }}/display/list", formData).then((res) => {
             sub = res.data.substation
             for (let index = 0; index < sub.length; index++) {
                 if (sub[index]['now'] == null) {
@@ -160,7 +158,7 @@
         const formData = new FormData();
         formData.append('station', station);
         formData.append('vn', vn);
-        await axios.post("{{ env('APP_URL') }}/display/updateCall", formData)
+        await axios.post("{{ env("APP_URL") }}/display/updateCall", formData)
 
         return 'success'
     }
@@ -168,73 +166,73 @@
     async function playsounds(vn, lang, room, station) {
         vn = vn.split("");
         if (lang == 'th') {
-            var audio0_1 = new Audio('{{ asset('sounds/th/0.mp3') }}');
-            var audio0_2 = new Audio('{{ asset('sounds/th/0.mp3') }}');
-            var audio0_3 = new Audio('{{ asset('sounds/th/0.mp3') }}');
-            var audio0_4 = new Audio('{{ asset('sounds/th/0.mp3') }}');
-            var audio1 = new Audio('{{ asset('sounds/th/1.mp3') }}');
-            var audio2 = new Audio('{{ asset('sounds/th/2.mp3') }}');
-            var audio3 = new Audio('{{ asset('sounds/th/3.mp3') }}');
-            var audio4 = new Audio('{{ asset('sounds/th/4.mp3') }}');
-            var audio5 = new Audio('{{ asset('sounds/th/5.mp3') }}');
-            var audio6 = new Audio('{{ asset('sounds/th/6.mp3') }}');
-            var audio7 = new Audio('{{ asset('sounds/th/7.mp3') }}');
-            var audio8 = new Audio('{{ asset('sounds/th/8.mp3') }}');
-            var audio9 = new Audio('{{ asset('sounds/th/9.mp3') }}');
-            var audioin = new Audio('{{ asset('sounds/th/in.mp3') }}');
-            var audioout = new Audio('{{ asset('sounds/th/out.mp3') }}');
+            var audio0_1 = new Audio('{{ asset("sounds/th/0.mp3") }}');
+            var audio0_2 = new Audio('{{ asset("sounds/th/0.mp3") }}');
+            var audio0_3 = new Audio('{{ asset("sounds/th/0.mp3") }}');
+            var audio0_4 = new Audio('{{ asset("sounds/th/0.mp3") }}');
+            var audio1 = new Audio('{{ asset("sounds/th/1.mp3") }}');
+            var audio2 = new Audio('{{ asset("sounds/th/2.mp3") }}');
+            var audio3 = new Audio('{{ asset("sounds/th/3.mp3") }}');
+            var audio4 = new Audio('{{ asset("sounds/th/4.mp3") }}');
+            var audio5 = new Audio('{{ asset("sounds/th/5.mp3") }}');
+            var audio6 = new Audio('{{ asset("sounds/th/6.mp3") }}');
+            var audio7 = new Audio('{{ asset("sounds/th/7.mp3") }}');
+            var audio8 = new Audio('{{ asset("sounds/th/8.mp3") }}');
+            var audio9 = new Audio('{{ asset("sounds/th/9.mp3") }}');
+            var audioin = new Audio('{{ asset("sounds/th/in.mp3") }}');
+            var audioout = new Audio('{{ asset("sounds/th/out.mp3") }}');
 
-            var room1 = new Audio('{{ asset('sounds/th/1.mp3') }}');
-            var room2 = new Audio('{{ asset('sounds/th/2.mp3') }}');
-            var room3 = new Audio('{{ asset('sounds/th/3.mp3') }}');
-            var room4 = new Audio('{{ asset('sounds/th/4.mp3') }}');
-            var room5 = new Audio('{{ asset('sounds/th/5.mp3') }}');
+            var room1 = new Audio('{{ asset("sounds/th/1.mp3") }}');
+            var room2 = new Audio('{{ asset("sounds/th/2.mp3") }}');
+            var room3 = new Audio('{{ asset("sounds/th/3.mp3") }}');
+            var room4 = new Audio('{{ asset("sounds/th/4.mp3") }}');
+            var room5 = new Audio('{{ asset("sounds/th/5.mp3") }}');
 
-            var staff = new Audio('{{ asset('sounds/th/empty.mp3') }}');
-            var vital = new Audio('{{ asset('sounds/th/vs.mp3') }}');
-            var blood = new Audio('{{ asset('sounds/th/lab.mp3') }}');
-            var ekg = new Audio('{{ asset('sounds/th/ekg.mp3') }}');
-            var abi = new Audio('{{ asset('sounds/th/empty.mp3') }}');
-            var estecho = new Audio('{{ asset('sounds/th/empty.mp3') }}');
-            var xray = new Audio('{{ asset('sounds/th/xray.mp3') }}');
-            var mammo = new Audio('{{ asset('sounds/th/mammo.mp3') }}');
-            var bone = new Audio('{{ asset('sounds/th/bone.mp3') }}');
-            var ultra = new Audio('{{ asset('sounds/th/ultra.mp3') }}');
-            var obs = new Audio('{{ asset('sounds/th/obs.mp3') }}');
+            var staff = new Audio('{{ asset("sounds/th/empty.mp3") }}');
+            var vital = new Audio('{{ asset("sounds/th/vs.mp3") }}');
+            var blood = new Audio('{{ asset("sounds/th/lab.mp3") }}');
+            var ekg = new Audio('{{ asset("sounds/th/ekg.mp3") }}');
+            var abi = new Audio('{{ asset("sounds/th/empty.mp3") }}');
+            var estecho = new Audio('{{ asset("sounds/th/empty.mp3") }}');
+            var xray = new Audio('{{ asset("sounds/th/xray.mp3") }}');
+            var mammo = new Audio('{{ asset("sounds/th/mammo.mp3") }}');
+            var bone = new Audio('{{ asset("sounds/th/bone.mp3") }}');
+            var ultra = new Audio('{{ asset("sounds/th/ultra.mp3") }}');
+            var obs = new Audio('{{ asset("sounds/th/obs.mp3") }}');
         } else {
-            var audio0_1 = new Audio('{{ asset('sounds/en/0.mp3') }}');
-            var audio0_2 = new Audio('{{ asset('sounds/en/0.mp3') }}');
-            var audio0_3 = new Audio('{{ asset('sounds/en/0.mp3') }}');
-            var audio0_4 = new Audio('{{ asset('sounds/en/0.mp3') }}');
-            var audio1 = new Audio('{{ asset('sounds/en/1.mp3') }}');
-            var audio2 = new Audio('{{ asset('sounds/en/2.mp3') }}');
-            var audio3 = new Audio('{{ asset('sounds/en/3.mp3') }}');
-            var audio4 = new Audio('{{ asset('sounds/en/4.mp3') }}');
-            var audio5 = new Audio('{{ asset('sounds/en/5.mp3') }}');
-            var audio6 = new Audio('{{ asset('sounds/en/6.mp3') }}');
-            var audio7 = new Audio('{{ asset('sounds/en/7.mp3') }}');
-            var audio8 = new Audio('{{ asset('sounds/en/8.mp3') }}');
-            var audio9 = new Audio('{{ asset('sounds/en/9.mp3') }}');
-            var audioin = new Audio('{{ asset('sounds/en/in.mp3') }}');
-            var audioout = new Audio('{{ asset('sounds/en/empty.mp3') }}');
+            var audio0_1 = new Audio('{{ asset("sounds/en/0.mp3") }}');
+            var audio0_2 = new Audio('{{ asset("sounds/en/0.mp3") }}');
+            var audio0_3 = new Audio('{{ asset("sounds/en/0.mp3") }}');
+            var audio0_4 = new Audio('{{ asset("sounds/en/0.mp3") }}');
+            var audio1 = new Audio('{{ asset("sounds/en/1.mp3") }}');
+            var audio2 = new Audio('{{ asset("sounds/en/2.mp3") }}');
+            var audio3 = new Audio('{{ asset("sounds/en/3.mp3") }}');
+            var audio4 = new Audio('{{ asset("sounds/en/4.mp3") }}');
+            var audio5 = new Audio('{{ asset("sounds/en/5.mp3") }}');
+            var audio6 = new Audio('{{ asset("sounds/en/6.mp3") }}');
+            var audio7 = new Audio('{{ asset("sounds/en/7.mp3") }}');
+            var audio8 = new Audio('{{ asset("sounds/en/8.mp3") }}');
+            var audio9 = new Audio('{{ asset("sounds/en/9.mp3") }}');
+            var audioin = new Audio('{{ asset("sounds/en/in.mp3") }}');
+            var audioout = new Audio('{{ asset("sounds/en/empty.mp3") }}');
 
-            var room1 = new Audio('{{ asset('sounds/en/1.mp3') }}');
-            var room2 = new Audio('{{ asset('sounds/en/2.mp3') }}');
-            var room3 = new Audio('{{ asset('sounds/en/3.mp3') }}');
-            var room4 = new Audio('{{ asset('sounds/en/4.mp3') }}');
-            var room5 = new Audio('{{ asset('sounds/en/5.mp3') }}');
+            var room1 = new Audio('{{ asset("sounds/en/1.mp3") }}');
+            var room2 = new Audio('{{ asset("sounds/en/2.mp3") }}');
+            var room3 = new Audio('{{ asset("sounds/en/3.mp3") }}');
+            var room4 = new Audio('{{ asset("sounds/en/4.mp3") }}');
+            var room5 = new Audio('{{ asset("sounds/en/5.mp3") }}');
 
-            var staff = new Audio('{{ asset('sounds/en/empty.mp3') }}');
-            var vital = new Audio('{{ asset('sounds/en/vs.mp3') }}');
-            var blood = new Audio('{{ asset('sounds/en/lab.mp3') }}');
-            var ekg = new Audio('{{ asset('sounds/en/ekg.mp3') }}');
-            var abi = new Audio('{{ asset('sounds/en/empty.mp3') }}');
-            var estecho = new Audio('{{ asset('sounds/en/empty.mp3') }}');
-            var xray = new Audio('{{ asset('sounds/en/xray.mp3') }}');
-            var mammo = new Audio('{{ asset('sounds/en/mammo.mp3') }}');
-            var bone = new Audio('{{ asset('sounds/en/bone.mp3') }}');
-            var ultra = new Audio('{{ asset('sounds/en/ultra.mp3') }}');
-            var obs = new Audio('{{ asset('sounds/en/obs.mp3') }}');
+            var staff = new Audio('{{ asset("sounds/en/empty.mp3") }}');
+            var vital = new Audio('{{ asset("sounds/en/vs.mp3") }}');
+            var blood = new Audio('{{ asset("sounds/en/lab.mp3") }}');
+            var ekg = new Audio('{{ asset("sounds/en/ekg.mp3") }}');
+            var abi = new Audio('{{ asset("sounds/en/empty.mp3") }}');
+            var estecho = new Audio('{{ asset("sounds/en/empty.mp3") }}');
+            var xray = new Audio('{{ asset("sounds/en/xray.mp3") }}');
+            var mammo = new Audio('{{ asset("sounds/en/mammo.mp3") }}');
+            var bone = new Audio('{{ asset("sounds/en/bone.mp3") }}');
+            var ultra = new Audio('{{ asset("sounds/en/ultra.mp3") }}');
+            var obs = new Audio('{{ asset("sounds/en/obs.mp3") }}');
         }
         var num1;
         var num2;
