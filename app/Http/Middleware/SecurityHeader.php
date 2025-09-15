@@ -25,11 +25,11 @@ class SecurityHeader
 
         $csp = "default-src 'self';
         script-src 'self' 'unsafe-inline';
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
         script-src-elem 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com;
         img-src 'self';
         connect-src 'self';
-        font-src 'self' https://fonts.gstatic.com/;
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
         frame-src 'self';
         frame-ancestors 'self'";
         $csp = trim(preg_replace('/\s\s+/', ' ', $csp));

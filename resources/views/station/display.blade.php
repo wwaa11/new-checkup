@@ -82,7 +82,7 @@
         startTime()
         setTimeout(function() {
             getList()
-        }, 1000 * 20);
+        }, 1000 * 10);
     });
 
     async function getList() {

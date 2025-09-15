@@ -20,6 +20,6 @@ class obsAuth
             return $next($request);
         }
 
-        return redirect(route('obs.auth'));
+        return redirect(env('APP_URL') . '/obs/auth');
     }
 }

@@ -20,7 +20,7 @@
                 <div class="flex h-20 items-center justify-between">
                     <!-- Logo and Brand -->
                     <div class="flex items-center space-x-4">
-                        <a class="group flex items-center space-x-4 transition-all duration-300 hover:scale-105" href="{{ route("obs.index") }}">
+                        <a class="group flex items-center space-x-4 transition-all duration-300 hover:scale-105" href="{{ env("APP_URL") }}/obs">
                             <div class="relative">
                                 <img class="h-12 rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-xl" src="{{ asset("images/Side Logo.png") }}" alt="logo">
                                 <div class="absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 blur transition-opacity duration-300 group-hover:opacity-20"></div>
@@ -34,11 +34,11 @@
 
                     <!-- Navigation Menu -->
                     <div class="hidden items-center space-x-8 md:flex">
-                        <a class="group flex items-center space-x-2 rounded-lg px-4 py-2 text-slate-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600" href="{{ route("obs.index") }}">
+                        <a class="group flex items-center space-x-2 rounded-lg px-4 py-2 text-slate-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600" href="{{ env("APP_URL") }}/obs">
                             <i class="fas fa-home transition-colors duration-200 group-hover:text-blue-600"></i>
                             <span class="font-medium">หน้าหลัก</span>
                         </a>
-                        <a class="group flex items-center space-x-2 rounded-lg px-4 py-2 text-slate-700 transition-all duration-200 hover:bg-purple-50 hover:text-purple-600" href="{{ route("obs.registeration") }}">
+                        <a class="group flex items-center space-x-2 rounded-lg px-4 py-2 text-slate-700 transition-all duration-200 hover:bg-purple-50 hover:text-purple-600" href="{{ env("APP_URL") }}/obs/registeration">
                             <i class="fas fa-user-plus transition-colors duration-200 group-hover:text-purple-600"></i>
                             <span class="font-medium">ลงทะเบียน</span>
                         </a>
@@ -73,11 +73,11 @@
                 <!-- Mobile Menu -->
                 <div class="hidden border-t border-slate-200 bg-white/95 py-4 md:hidden" id="mobileMenu">
                     <div class="space-y-2">
-                        <a class="flex items-center space-x-3 rounded-lg px-4 py-3 text-slate-700 transition-colors duration-200 hover:bg-blue-50 hover:text-blue-600" href="{{ route("obs.index") }}">
+                        <a class="flex items-center space-x-3 rounded-lg px-4 py-3 text-slate-700 transition-colors duration-200 hover:bg-blue-50 hover:text-blue-600" href="{{ env("APP_URL") }}/obs/index">
                             <i class="fas fa-home"></i>
                             <span class="font-medium">หน้าหลัก</span>
                         </a>
-                        <a class="flex items-center space-x-3 rounded-lg px-4 py-3 text-slate-700 transition-colors duration-200 hover:bg-purple-50 hover:text-purple-600" href="{{ route("obs.registeration") }}">
+                        <a class="flex items-center space-x-3 rounded-lg px-4 py-3 text-slate-700 transition-colors duration-200 hover:bg-purple-50 hover:text-purple-600" href="{{ env("APP_URL") }}/obs/registeration">
                             <i class="fas fa-user-plus"></i>
                             <span class="font-medium">ลงทะเบียน</span>
                         </a>
@@ -107,7 +107,7 @@
     async function logoutFn() {
         const formData = new FormData();
         const res = await axios.post("{{ env("APP_URL") }}/unauth", formData);
-        window.location = "{{ route("obs.auth") }}";
+        window.location = "{{ env("APP_URL") }}/obs/auth";
     }
 
     function toggleMobileMenu() {

@@ -6,7 +6,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <div class="mb-2 flex items-center">
-                        <a class="mr-3 text-purple-200 transition-colors hover:text-white" href="{{ route("obs.index") }}">
+                        <a class="mr-3 text-purple-200 transition-colors hover:text-white" href="{{ env("APP_URL") }}/obs/index">
                             <i class="fas fa-arrow-left text-xl"></i>
                         </a>
                         <h1 class="flex items-center text-3xl font-bold">
@@ -230,7 +230,7 @@
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
             formData.append('type', type);
-            await axios.post("{{ route("obs.substation.getTask") }}", formData).then((res) => {
+            await axios.post("{{ env("APP_URL") }}/obs/substation/getTask", formData).then((res) => {
                 const tasks = res.data.tasks
                 if (tasks.length == 0) {
                     return
@@ -306,7 +306,7 @@
                 formData.append('id', id);
                 formData.append('substation_id', '{{ $substation->id }}');
                 formData.append('reason', result.value);
-                await axios.post("{{ route("obs.substation.skipPatient") }}", formData).then((res) => {
+                await axios.post("{{ env("APP_URL") }}/obs/substation/skipPatient", formData).then((res) => {
                     if (res.data.status == 'success') {
                         Swal.fire({
                             title: "Success!",
@@ -346,7 +346,7 @@
                     const formData = new FormData();
                     formData.append('id', id);
                     formData.append('substation_id', '{{ $substation->id }}');
-                    await axios.post("{{ route("obs.substation.callPatient") }}", formData).then((res) => {
+                    await axios.post("{{ env("APP_URL") }}/obs/substation/callPatient", formData).then((res) => {
                         if (res.data.status == 'success') {
                             Swal.fire({
                                 title: "Success!",
@@ -394,7 +394,7 @@
                     formData.append('id', id);
                     formData.append('substation_id', '{{ $substation->id }}');
                     formData.append('reason', result.value);
-                    await axios.post("{{ route("obs.substation.cancelPatient") }}", formData).then((res) => {
+                    await axios.post("{{ env("APP_URL") }}/obs/substation/cancelPatient", formData).then((res) => {
                         if (res.data.status == 'success') {
                             Swal.fire({
                                 title: "Success!",
@@ -434,7 +434,7 @@
 
                     const formData = new FormData();
                     formData.append('substation_id', '{{ $substation->id }}');
-                    await axios.post("{{ route("obs.substation.callAgainPatient") }}", formData).then((res) => {
+                    await axios.post("{{ env("APP_URL") }}/obs/substation/callAgainPatient", formData).then((res) => {
                         if (res.data.status == 'success') {
                             Swal.fire({
                                 title: "Success!",
@@ -474,7 +474,7 @@
 
                     const formData = new FormData();
                     formData.append('substation_id', '{{ $substation->id }}');
-                    await axios.post("{{ route("obs.substation.successPatient") }}", formData).then((res) => {
+                    await axios.post("{{ env("APP_URL") }}/obs/substation/successPatient", formData).then((res) => {
                         if (res.data.status == 'success') {
                             Swal.fire({
                                 title: "Success!",

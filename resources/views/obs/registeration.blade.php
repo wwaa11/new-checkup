@@ -136,7 +136,7 @@
                 confirmButtonText: "อัพเดต",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    axios.post("{{ route("obs.registeration.update-doctor") }}", {
+                    axios.post("{{ env("APP_URL") }}/obs/registeration/update-doctor", {
                         substation_id: substationId,
                         doctor_code: doctorCode,
                     }).then((response) => {
@@ -179,7 +179,7 @@
                 confirmButtonText: "ลงทะเบียน",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    axios.post("{{ route("obs.registeration.register-patient") }}", {
+                    axios.post("{{ env("APP_URL") }}/obs/registeration/register-patient", {
                         substation_id: substationId,
                         hn: hn,
                     }).then((response) => {

@@ -19,7 +19,7 @@
     <div class="mb-8">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <!-- Registration Card -->
-            <a class="group" href="{{ route("obs.registeration") }}">
+            <a class="group" href="{{ env("APP_URL") }}/obs/registeration">
                 <div class="transform rounded-xl border border-slate-200 bg-white p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl">
                     <div class="mb-4 flex items-center justify-between">
                         <div class="rounded-lg bg-green-100 p-3">
@@ -48,7 +48,7 @@
         @if ($stations->substations->count() > 0)
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 @foreach ($stations->substations as $index => $substation)
-                    <a class="group" href="{{ route("obs.substation", $substation->id) }}">
+                    <a class="group" href="{{ env("APP_URL") }}/obs/substation/{{ $substation->id }}">
                         <div class="transform rounded-xl border border-slate-200 bg-white p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl">
                             <!-- Station Icon -->
                             <div class="mb-4 flex items-center justify-between">

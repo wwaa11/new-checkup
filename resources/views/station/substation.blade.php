@@ -1,19 +1,19 @@
-@extends('station.layouts.app')
-@section('station')
+@extends("station.layouts.app")
+@section("station")
     {{ $substation->name }}
 @endsection
-@section('body')
+@section("body")
     <div class="p-6">
-        <div class="flex px-6 gap-3">
-            <div class="flex-shrink p-3 pt-4 font-bold text-2xl text-gray-600">{{ $substation->name }}</div>
-            <div class="flex-grow gap-3 flex">
-                <button class="py-3 rounded border w-32 bg-[#008387] text-white" type="button" onclick="CallFn()">
+        <div class="flex gap-3 px-6">
+            <div class="flex-shrink p-3 pt-4 text-2xl font-bold text-gray-600">{{ $substation->name }}</div>
+            <div class="flex flex-grow gap-3">
+                <button class="w-32 rounded border bg-[#008387] py-3 text-white" type="button" onclick="CallFn()">
                     Call New Patient
                 </button>
-                <div class="flex-grow p-3 pt-4 font-bold text-2xl shadow bg-gray-100">
+                <div class="flex-grow bg-gray-100 p-3 pt-4 text-2xl font-bold shadow">
                     @if ($patient->enabled)
                         <div class="flex w-full gap-3 text-gray-600">
-                            <div class="text-end flex-shrink">VN:
+                            <div class="flex-shrink text-end">VN:
                                 <span class="text-red-600" id="vn">{{ $patient->vn }}</span>
                             </div>
                             <div class="flex-grow">Name:
@@ -24,16 +24,13 @@
                     @endif
                 </div>
                 @if ($patient->enabled)
-                    <button class="py-3 rounded border w-32 bg-pink-600 text-white" type="button"
-                        onclick="CallSoundFn('{{ $patient->vn }}')">
+                    <button class="w-32 rounded border bg-pink-600 py-3 text-white" type="button" onclick="CallSoundFn('{{ $patient->vn }}')">
                         Call Sound
                     </button>
-                    <button class="py-3 rounded border w-32 bg-amber-500 text-white" type="button"
-                        onclick="HoldFn('{{ $patient->vn }}')">
+                    <button class="w-32 rounded border bg-amber-500 py-3 text-white" type="button" onclick="HoldFn('{{ $patient->vn }}')">
                         Hold
                     </button>
-                    <button class="py-3 rounded border w-32 bg-green-600 text-white" type="button"
-                        onclick="SuccessFn('{{ $patient->vn }}')">
+                    <button class="w-32 rounded border bg-green-600 py-3 text-white" type="button" onclick="SuccessFn('{{ $patient->vn }}')">
                         Success
                     </button>
                 @endif
@@ -41,8 +38,8 @@
         </div>
         <div class="w-full p-6">
             <div class="grid grid-cols-2 gap-3">
-                <div class="w-full mt-6 text-center">
-                    <div class="bg-[#008387] text-white rounded">
+                <div class="mt-6 w-full text-center">
+                    <div class="rounded bg-[#008387] text-white">
                         <div class="p-3">Waiting...</div>
                         <hr>
                         <div class="grid grid-cols-4 p-3 shadow">
@@ -54,8 +51,8 @@
                     </div>
                     <div class="flex-col" id="waiting"></div>
                 </div>
-                <div class="w-full mt-6 text-center">
-                    <div class="bg-[#008387] text-white rounded">
+                <div class="mt-6 w-full text-center">
+                    <div class="rounded bg-[#008387] text-white">
                         <div class="p-3">Holding...</div>
                         <hr>
                         <div class="grid grid-cols-4 p-3 shadow">
@@ -69,8 +66,8 @@
                 </div>
             </div>
             <div class="flex gap-3">
-                <div class="w-full mt-6 text-center flex-grow">
-                    <div class="bg-[#008387] text-white rounded">
+                <div class="mt-6 w-full flex-grow text-center">
+                    <div class="rounded bg-[#008387] text-white">
                         <div class="p-3">Waiting for Register</div>
                         <hr>
                         <div class="grid grid-cols-2 p-3 shadow">
@@ -80,9 +77,9 @@
                     </div>
                     <div id="alltask"></div>
                 </div>
-                @if ($substation->station->code == 'b12_lab')
-                    <div class="w-full mt-6 text-center flex-grow">
-                        <div class="bg-[#008387] text-white rounded">
+                @if ($substation->station->code == "b12_lab")
+                    <div class="mt-6 w-full flex-grow text-center">
+                        <div class="rounded bg-[#008387] text-white">
                             <div class="p-3">SSP</div>
                             <hr>
                             <div class="grid grid-cols-3 p-3 shadow">
@@ -98,7 +95,7 @@
         </div>
     </div>
 @endsection
-@section('scripts')
+@section("scripts")
     <script>
         $(document).ready(function() {
             getTask('process')
@@ -123,7 +120,7 @@
             formData.append('vn', $('#vn').html());
             formData.append('code', '{{ $substation->station->code }}');
             formData.append('substation_id', '{{ $substation->id }}');
-            await axios.post("{{ env('APP_URL') }}/station/checksuccess", formData).then((res) => {
+            await axios.post("{{ env("APP_URL") }}/station/checksuccess", formData).then((res) => {
                 console.log(res.data.status)
                 if (res.data.status == 'success') {
                     location.reload();
@@ -140,7 +137,7 @@
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
             formData.append('type', type);
-            await axios.post("{{ env('APP_URL') }}/station/getTask", formData).then((res) => {
+            await axios.post("{{ env("APP_URL") }}/station/getTask", formData).then((res) => {
                 const tasks = res.data.tasks
                 setHtml = '';
                 tasks.forEach(function(val, i) {
@@ -161,7 +158,7 @@
                     }
                     setHtml = setHtml + '</div>';
                     setHtml = setHtml + '<div class="p-2 ">'
-                    setHtml = setHtml + '<div class="">' + val.assign + '</div>'
+                    setHtml = setHtml + '<div class="">' + val.assignTime + '</div>'
                     setHtml = setHtml + '<div class="text-red-600">( ' + val.Time + ' mins. )</div>'
                     setHtml = setHtml + '</div>'
                     setHtml = setHtml + '<div class="p-2 gap-2 text-center flex">';
@@ -195,7 +192,7 @@
         async function getSSP() {
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
-            await axios.post("{{ env('APP_URL') }}/station/getSSP", formData).then((res) => {
+            await axios.post("{{ env("APP_URL") }}/station/getSSP", formData).then((res) => {
                 const tasks = res.data.tasks
                 setHtml = '';
                 tasks.forEach(function(val, i) {
@@ -236,7 +233,7 @@
             if (alert.isConfirmed) {
                 const formData = new FormData();
                 formData.append('vn', vn);
-                await axios.post("{{ env('APP_URL') }}/station/changeSSP", formData).then((res) => {
+                await axios.post("{{ env("APP_URL") }}/station/changeSSP", formData).then((res) => {
                     location.reload();
                 })
             }
@@ -245,7 +242,7 @@
         async function getAllTask() {
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
-            await axios.post("{{ env('APP_URL') }}/station/allTask", formData).then((res) => {
+            await axios.post("{{ env("APP_URL") }}/station/allTask", formData).then((res) => {
                 const tasks = res.data.tasks
                 setHtml = '';
                 var index =
@@ -278,7 +275,7 @@
                 const formData = new FormData();
                 formData.append('substation_id', '{{ $substation->id }}');
                 formData.append('vn', vn);
-                await axios.post("{{ env('APP_URL') }}/station/success", formData).then((res) => {
+                await axios.post("{{ env("APP_URL") }}/station/success", formData).then((res) => {
                     location.reload();
                 })
             }
@@ -288,7 +285,7 @@
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
             formData.append('vn', vn);
-            await axios.post("{{ env('APP_URL') }}/station/call", formData).then((res) => {
+            await axios.post("{{ env("APP_URL") }}/station/call", formData).then((res) => {
                 location.reload();
             })
         }
@@ -297,7 +294,7 @@
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
             formData.append('vn', vn);
-            await axios.post("{{ env('APP_URL') }}/station/callsound", formData).then((res) => {
+            await axios.post("{{ env("APP_URL") }}/station/callsound", formData).then((res) => {
                 alert(res)
             })
         }
@@ -318,7 +315,7 @@
                 formData.append('substation_id', '{{ $substation->id }}');
                 formData.append('vn', vn);
                 formData.append('reason', reason);
-                await axios.post("{{ env('APP_URL') }}/station/hold", formData).then((res) => {
+                await axios.post("{{ env("APP_URL") }}/station/hold", formData).then((res) => {
                     location.reload();
                 })
             } else {
@@ -344,7 +341,7 @@
                 const formData = new FormData();
                 formData.append('substation_id', '{{ $substation->id }}');
                 formData.append('vn', vn);
-                await axios.post("{{ env('APP_URL') }}/station/delete", formData).then((res) => {
+                await axios.post("{{ env("APP_URL") }}/station/delete", formData).then((res) => {
                     location.reload();
                 })
             }

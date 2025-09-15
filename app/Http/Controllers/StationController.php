@@ -279,10 +279,10 @@ class StationController extends Controller
             ->get();
         $now_time = date_create(date('Y-m-d H:i:s'));
         foreach ($tasks as $task) {
-            $pre_time     = date_create($task->assign);
-            $diff         = $now_time->diff($pre_time);
-            $task->Time   = ($diff->h * 60) + $diff->i;
-            $task->assign = substr($task->assign, 11, 5);
+            $pre_time         = date_create($task->assign);
+            $diff             = $now_time->diff($pre_time);
+            $task->Time       = ($diff->h * 60) + $diff->i;
+            $task->assignTime = date('H:i', strtotime($task->assign));
         }
 
         return response()->json(['status' => 'success', 'tasks' => $tasks], 200);

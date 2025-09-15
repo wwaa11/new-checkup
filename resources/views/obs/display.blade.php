@@ -75,7 +75,7 @@
         const formData = new FormData();
         formData.append('station_id', '{{ $station->id }}');
 
-        await axios.post("{{ route("obs.display.list") }}", formData).then((res) => {
+        await axios.post("{{ env("APP_URL") }}/obs/display/list", formData).then((res) => {
             const datas = res.data.datas;
             for (const [key, type] of Object.entries(datas)) {
                 if (key == 'room') {
@@ -133,7 +133,7 @@
 
         const formData = new FormData();
         formData.append('vn', vn);
-        await axios.post("{{ route("obs.display.updateCall") }}", formData)
+        await axios.post("{{ env("APP_URL") }}/obs/display/updateCall", formData)
 
         return 'success'
     }
