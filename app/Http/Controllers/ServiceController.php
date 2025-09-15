@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Jobs\ProcessClearTask;
@@ -10,26 +9,26 @@ use Illuminate\Http\Request;
 class ServiceController extends Controller
 {
     //
-    function test()
+    public function test()
     {
-        $hour = (int)date('H');
-        
-        if($hour >= 5 && $hour <= 16){
+        $hour = (int) date('H');
+
+        if ($hour >= 5 && $hour <= 16) {
             echo('Service time : ');
-        }else{
+        } else {
             echo('Out of service time : ');
         }
 
-        return response()->json('CHECKUP PRARAM9 HOSPITAL : '.date('Y-m-d H:i:s') , 200);
+        return response()->json('CHECKUP PRARAM9 HOSPITAL : ' . date('Y-m-d H:i:s'), 200);
     }
-    function startService()
+    public function startService()
     {
-        $jobs = DB::table('jobs')->get();
+        $jobs  = DB::table('jobs')->get();
         $datas = [];
-        foreach($jobs as $data){
+        foreach ($jobs as $data) {
             $info = json_decode($data->payload);
             $name = explode('\\', $info->displayName);
-            switch($name[2]) {
+            switch ($name[2]) {
                 case 'ProcessClearTask':
                     $type = 1;
                     break;
@@ -41,45 +40,46 @@ class ServiceController extends Controller
                     break;
             }
             $datas[] = [
-                'id' => $data->id,
-                'type' => $type,
-                'name' => $name[2],
-                'create' => date('d-m-Y H:i:s', $data->created_at),
+                'id'        => $data->id,
+                'type'      => $type,
+                'name'      => $name[2],
+                'create'    => date('d-m-Y H:i:s', $data->created_at),
+                'available' => date('d-m-Y H:i:s', $data->available_at),
             ];
         }
 
         return view('services')->with(compact('datas'));
     }
-    function dispatchCreate()
+    public function dispatchCreate()
     {
         ProcessCreateTask::dispatch();
         return response()->json('success', 200);
     }
-    function dispatchClear()
+    public function dispatchClear()
     {
         ProcessClearTask::dispatch();
         return response()->json('success', 200);
     }
-    function dispatchDelete(Request $request)
+    public function dispatchDelete(Request $request)
     {
         $jobs = DB::table('jobs')->where('id', $request->id)->delete();
 
         return response()->json('success', 200);
     }
 
-    function LineMessageCheck()
+    public function LineMessageCheck()
     {
         $curl = curl_init();
-        curl_setopt_array($curl, array(
-        CURLOPT_URL => 'https://api.line.me/v2/bot/message/push',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_POSTFIELDS =>'{
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => 'https://api.line.me/v2/bot/message/push',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => '',
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_POSTFIELDS     => '{
             "to": "U3d7ba4f0386437906a68612c1cce5eba",
             "messages":[
                 {
@@ -100,10 +100,10 @@ class ServiceController extends Controller
                 }
             ]
         }',
-        CURLOPT_HTTPHEADER => array(
-            'Authorization: Bearer '.env('LINE_Token').'','Content-Type: application/json'
-        ),
-        ));
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . env('LINE_Token') . '', 'Content-Type: application/json',
+            ],
+        ]);
         $response = curl_exec($curl);
         curl_close($curl);
 

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Middleware;
 
 use Closure;
@@ -18,13 +17,19 @@ class SecurityHeader
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
-        $csp = "default-src 'self'; 
+
+        // Skip security headers in local environment
+        if (env('APP_ENV') === 'local') {
+            return $response;
+        }
+
+        $csp = "default-src 'self';
         script-src 'self' 'unsafe-inline';
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
-        script-src-elem 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.jsdelivr.net https://code.jquery.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        script-src-elem 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com;
         img-src 'self';
-        connect-src 'self'; 
-        font-src 'self' https://fonts.gstatic.com/; 
+        connect-src 'self';
+        font-src 'self' https://fonts.gstatic.com/;
         frame-src 'self';
         frame-ancestors 'self'";
         $csp = trim(preg_replace('/\s\s+/', ' ', $csp));

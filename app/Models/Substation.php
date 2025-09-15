@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use App\Models\Station;
@@ -17,5 +16,15 @@ class Substation extends Model
     public function station(): BelongsTo
     {
         return $this->belongsTo(Station::class);
+    }
+
+    public function doctor()
+    {
+        return $this->hasOne(SubstationDoctor::class, 'substation_id');
+    }
+
+    public function patientNow()
+    {
+        return $this->hasOne(Patient::class, 'vn', 'now')->where('date', date('Y-m-d'));
     }
 }
