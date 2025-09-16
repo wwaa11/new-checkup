@@ -149,8 +149,8 @@ class StationController extends Controller
                 ->first();
             if ($patient == null) {
                 $substation->now = null;
-                $substation->save()
-                ;
+                $substation->save();
+
                 $patient = (object) [
                     'enabled' => 0,
                 ];

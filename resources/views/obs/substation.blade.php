@@ -27,7 +27,7 @@
 
     <!-- Station Status Cards -->
     <div class="flex-3 mb-8 flex gap-6">
-        @if ($substation->now != null)
+        @if ($substation->now !== null)
             <!-- Current Queue -->
             <div class="flex-2 group transform rounded-2xl border border-slate-200 bg-white p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
                 <div class="mb-4 flex items-center justify-between">

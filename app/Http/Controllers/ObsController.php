@@ -237,6 +237,16 @@ class ObsController extends Controller
     public function substation($id)
     {
         $substation = Substation::with('patientNow')->find($id);
+        if ($substation->now !== null) {
+            $patient = Patient::where('date', date('Y-m-d'))
+                ->where('vn', $substation->now)
+                ->first();
+
+            if ($patient == null) {
+                $substation->now = null;
+                $substation->save();
+            }
+        }
 
         return view('obs.substation', compact('substation'));
     }
