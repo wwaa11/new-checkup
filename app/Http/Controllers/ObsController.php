@@ -414,6 +414,26 @@ class ObsController extends Controller
         return response()->json(['status' => 'success', 'message' => 'สำเร็จ'], 200);
     }
 
+    public function cancelPatient(Request $request)
+    {
+        $taskId        = $request->id;
+        $substation    = Substation::find($request->substation_id);
+        $task          = Patienttask::find($taskId);
+        $task->type    = 'success';
+        $task->success = date('Y-m-d H:i:s');
+        $task->save();
+
+        $newPatientLog             = new Patientlogs;
+        $newPatientLog->patient_id = $task->patient->id;
+        $newPatientLog->date       = date('Y-m-d');
+        $newPatientLog->hn         = $task->patient->hn;
+        $newPatientLog->text       = 'ลบคิวที่ : ' . $substation->name . ' : ' . $request->reason;
+        $newPatientLog->user       = Auth::user()->userid;
+        $newPatientLog->save();
+
+        return response()->json(['status' => 'success', 'message' => 'สำเร็จ'], 200);
+    }
+
     // Display
     public function display()
     {
