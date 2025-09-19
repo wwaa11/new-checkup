@@ -63,6 +63,7 @@ Route::middleware([obsAuth::class])->group(function () {
     Route::get('/obs/registeration', [ObsController::class, 'registeration'])->name('obs.registeration');
     Route::get('/obs/substation/{substation_id}', [ObsController::class, 'substation'])->name('obs.substation');
     Route::post('/obs/registeration/update-doctor', [ObsController::class, 'updateDoctor'])->name('obs.registeration.update-doctor');
+    Route::post('/obs/registeration/remove-doctor', [ObsController::class, 'removeDoctor'])->name('obs.registeration.remove-doctor');
     Route::post('/obs/registeration/register-patient', [ObsController::class, 'registerPatient'])->name('obs.registeration.register-patient');
     Route::post('/obs/substation/getTask', [ObsController::class, 'getTask'])->name('obs.substation.getTask');
     Route::post('/obs/substation/skipPatient', [ObsController::class, 'skipPatient'])->name('obs.substation.skipPatient');
@@ -70,8 +71,8 @@ Route::middleware([obsAuth::class])->group(function () {
     Route::post('/obs/substation/callAgainPatient', [ObsController::class, 'callAgainPatient'])->name('obs.substation.callAgainPatient');
     Route::post('/obs/substation/cancelPatient', [ObsController::class, 'cancelPatient'])->name('obs.substation.cancelPatient');
     Route::post('/obs/substation/successPatient', [ObsController::class, 'successPatient'])->name('obs.substation.successPatient');
-    // Display
-    Route::get('/obs/display', [ObsController::class, 'display'])->name('obs.display');
-    Route::post('/obs/display/list', [ObsController::class, 'displayList'])->name('obs.display.list');
-    Route::post('/obs/display/updateCall', [ObsController::class, 'displayUpdateCall'])->name('obs.display.updateCall');
 });
+// Display
+Route::get('/obs/display', [ObsController::class, 'display'])->name('obs.display');
+Route::post('/obs/display/list', [ObsController::class, 'displayList'])->name('obs.display.list');
+Route::post('/obs/display/updateCall', [ObsController::class, 'displayUpdateCall'])->name('obs.display.updateCall');

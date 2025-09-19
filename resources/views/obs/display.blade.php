@@ -8,6 +8,7 @@
     <link rel="shortcut icon" href="{{ asset("images/Logo.ico") }}">
     <script src="{{ asset("js/sweetalert2@11.js") }}"></script>
     @vite(["resources/css/app.css", "resources/js/app.js"])
+
 </head>
 <style>
     .colorChangeText {

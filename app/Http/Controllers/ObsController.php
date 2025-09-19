@@ -141,6 +141,14 @@ class ObsController extends Controller
         return response()->json(['status' => 1, 'message' => 'Doctor updated successfully']);
     }
 
+    public function removeDoctor(Request $request)
+    {
+        $substationId = $request->substation_id;
+        SubstationDoctor::where('substation_id', $substationId)->delete();
+
+        return response()->json(['status' => 1, 'message' => 'Doctor remove successfully']);
+    }
+
     public function registerPatient(Request $request)
     {
         $substationId = $request->input('substation_id');

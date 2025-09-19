@@ -52,9 +52,12 @@
                                     <div class="mr-3 rounded-full bg-green-100 p-2">
                                         <i class="fas fa-user-check text-green-600"></i>
                                     </div>
-                                    <div>
+                                    <div class="flex-1">
                                         <p class="font-semibold text-green-800">{{ $substation->doctor->doctor_code }}</p>
                                         <p class="text-sm text-green-600">{{ $substation->doctor->doctor_name }}</p>
+                                    </div>
+                                    <div class="cursor-pointer text-end" onclick="removeDoctor('{{ $substation->id }}')">
+                                        <i class="fa fa-trash p-2 text-red-600"></i>
                                     </div>
                                 </div>
                             </div>
@@ -143,7 +146,7 @@
                         if (response.data.status) {
                             Swal.fire({
                                 title: "Updated!",
-                                text: "Your file has been updated.",
+                                text: "Doctor has been updated.",
                                 icon: "success",
                             });
                             refreshPage();
@@ -158,6 +161,38 @@
                 }
             });
 
+        }
+
+        function removeDoctor(substationId) {
+            Swal.fire({
+                title: "ต้องการลบแพทย์ประจำห้อง?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "ลบ",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    axios.post("{{ env("APP_URL") }}/obs/registeration/remove-doctor", {
+                        substation_id: substationId,
+                    }).then((response) => {
+                        if (response.data.status) {
+                            Swal.fire({
+                                title: "Removed!",
+                                text: "Doctor has been remove.",
+                                icon: "success",
+                            });
+                            refreshPage();
+                        }
+                    }).catch((error) => {
+                        Swal.fire({
+                            title: "Error!",
+                            text: error.response.data.message,
+                            icon: "error",
+                        });
+                    });
+                }
+            });
         }
 
         function registerPatient(substationId) {
