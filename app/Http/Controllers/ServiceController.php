@@ -14,12 +14,12 @@ class ServiceController extends Controller
         $hour = (int) date('H');
 
         if ($hour >= 5 && $hour <= 16) {
-            echo('Service time : ');
+            $text = 'Service time : ';
         } else {
-            echo('Out of service time : ');
+            $text = 'Out of service time : ';
         }
 
-        return response()->json('CHECKUP PRARAM9 HOSPITAL : ' . date('Y-m-d H:i:s'), 200);
+        return response()->json('CHECKUP PRARAM9 HOSPITAL : ' . date('Y-m-d H:i:s') . ' ' . $text, 200);
     }
     public function startService()
     {

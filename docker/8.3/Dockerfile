@@ -91,6 +91,7 @@ RUN chown -R ${WWWUSER}:${WWWGROUP} /var/www/html/storage \
     && chmod -R ug+rwx /var/www/html/storage
 
 # Set ownership and permissions on the bootstrap/cache directory.
+# sudo chmod -R a+rwx storage bootstrap/cache
 RUN chown -R ${WWWUSER}:${WWWGROUP} /var/www/html/bootstrap/cache \
     && chmod -R ug+rwx /var/www/html/bootstrap/cache
 

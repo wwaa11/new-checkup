@@ -29,7 +29,6 @@ class ProcessCreateTask implements ShouldQueue
     {
         $hour = (int) date('H');
         if ($hour >= 5 && $hour <= 16) {
-
             $newDatas = DB::connection('NewUI')
                 ->table('HIS_CHKUP_HEADER')
                 ->join('HIS_CHECKUP_STATION_DETAIL', 'HIS_CHKUP_HEADER.RequestNo', '=', 'HIS_CHECKUP_STATION_DETAIL.CheckUpRequestNo')
@@ -53,9 +52,8 @@ class ProcessCreateTask implements ShouldQueue
                 ->get();
 
             $patients = Patient::where('date', date('Y-m-d'))->get();
-
+            $allTasks = Patienttask::where('date', date('Y-m-d'))->get();
             foreach ($newDatas as $data) {
-                // Log::channel('debug')->error("loop start data" . $data->HN);
                 $patient = collect($patients)->where('hn', $data->HN)->first();
                 if ($patient == null) {
                     $patient       = new Patient;
@@ -66,13 +64,7 @@ class ProcessCreateTask implements ShouldQueue
                     $patient->vn   = $data->VN;
                     $patient->save();
 
-                    $newPatientLog             = new Patientlogs;
-                    $newPatientLog->patient_id = $patient->id;
-                    $newPatientLog->date       = date('Y-m-d');
-                    $newPatientLog->hn         = $data->HN;
-                    $newPatientLog->text       = 'นำเข้าข้อมูลผู้ป่วยจาก NewUI';
-                    $newPatientLog->user       = 'service';
-                    $newPatientLog->save();
+                    $this->setLog($patient, 'นำเข้าข้อมูลผู้ป่วยจาก NewUI');
                 }
 
                 $checkValid = false;
@@ -90,7 +82,7 @@ class ProcessCreateTask implements ShouldQueue
                     case '02':
                         $checkValid = true;
                         $code       = 'b12_abi';
-                        $text       = 'Abi';
+                        $text       = 'ABI';
                         break;
                     case '04':
                         $checkValid = true;
@@ -120,11 +112,7 @@ class ProcessCreateTask implements ShouldQueue
                 }
 
                 if ($checkValid) {
-                    $task = Patienttask::where('hn', $data->HN)
-                        ->where('date', date('Y-m-d'))
-                        ->where('code', $code)
-                        ->first();
-
+                    $task = collect($allTasks)->where('hn', $data->HN)->where('code', $code)->first();
                     if ($task == null) {
                         $newTask             = new Patienttask;
                         $newTask->patient_id = $patient->id;
@@ -139,8 +127,9 @@ class ProcessCreateTask implements ShouldQueue
                             $newTask->memo1 = $data->FacilityRequestNo;
                         }
                         $newTask->save();
-                        $this->setLog($patient, 'สร้างรายการ Check UP : ' . $text);
 
+                        // Patient Log
+                        $this->setLog($patient, 'สร้างรายการ Check UP : ' . $text);
                         if ($code == 'b12_vitalsign') {
                             $this->setLog($patient, 'ลงทะเบียนคิวที่ : วัดความดัน');
                         }
