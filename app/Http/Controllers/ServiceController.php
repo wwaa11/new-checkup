@@ -35,6 +35,9 @@ class ServiceController extends Controller
                 case 'ProcessCreateTask':
                     $type = 2;
                     break;
+                case 'ProcessCreateTaskXray':
+                    $type = 2;
+                    break;
                 default:
                     $type = null;
                     break;
@@ -53,11 +56,14 @@ class ServiceController extends Controller
     public function dispatchCreate()
     {
         ProcessCreateTask::dispatch();
+        // ProcessCreateTaskXray::dispatch();
+
         return response()->json('success', 200);
     }
     public function dispatchClear()
     {
-        ProcessClearTask::dispatch();
+        ProcessClearTask::dispatch()->onQueue('clearing');
+
         return response()->json('success', 200);
     }
     public function dispatchDelete(Request $request)

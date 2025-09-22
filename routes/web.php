@@ -8,7 +8,7 @@ use App\Http\Middleware\obsAuth;
 use App\Http\Middleware\pr9Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [StationController::class, 'test']);
+Route::get('/', [ServiceController::class, 'test']);
 
 // Services
 Route::get('/serviceStart', [ServiceController::class, 'startService']);

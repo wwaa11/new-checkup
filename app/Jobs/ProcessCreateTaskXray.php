@@ -7,9 +7,8 @@ use App\Models\Patienttask;
 use DB;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Throwable;
 
-class ProcessCreateTask implements ShouldQueue
+class ProcessCreateTaskXray implements ShouldQueue
 {
     use Queueable;
     public $tries   = 50;
@@ -17,14 +16,12 @@ class ProcessCreateTask implements ShouldQueue
 
     public function uniqueId(): string
     {
-        return 'checkup_task_' . now()->timestamp;
+        return 'xray_task_' . now()->timestamp;
     }
 
-    public function __construct()
-    {
-
-    }
-
+    /**
+     * Execute the job.
+     */
     public function handle(): void
     {
         $hour = (int) date('H');
@@ -36,7 +33,7 @@ class ProcessCreateTask implements ShouldQueue
                 ->whereDate('HIS_CHECKUP_STATION_DETAIL.Visitdate', date('Y-m-d'))
                 ->where('HIS_CHKUP_HEADER.Clinic', '1800')
                 ->where('HIS_CHKUP_HEADER.ComputerLocation', 'LIKE', 'B12%')
-                ->whereIn('HIS_CHECKUP_STATION_DETAIL.StationCode', ['01', '011'])
+                ->whereIn('HIS_CHECKUP_STATION_DETAIL.StationCode', ['06', '07', '08', '09'])
                 ->select(
                     'HIS_CHECKUP_STATION_DETAIL.Visitdate',
                     'HIS_CHECKUP_STATION_DETAIL.HN',
@@ -120,6 +117,7 @@ class ProcessCreateTask implements ShouldQueue
                 }
 
                 if ($checkValid) {
+
                     $task = Patienttask::where('hn', $data->HN)
                         ->where('date', date('Y-m-d'))
                         ->where('code', $code)
@@ -133,16 +131,29 @@ class ProcessCreateTask implements ShouldQueue
                         $newTask->vn         = $data->VN;
                         $newTask->code       = $code;
                         if ($code == 'b12_vitalsign') {
-                            $newTask->assign = now();
+                            $newTask->assign = date('Y-m-d H:i:s');
                         }
                         if ($code == 'b12_lab') {
                             $newTask->memo1 = $data->FacilityRequestNo;
                         }
                         $newTask->save();
-                        $this->setLog($patient, 'สร้างรายการ Check UP : ' . $text);
+
+                        $newPatientLog             = new Patientlogs;
+                        $newPatientLog->patient_id = $patient->id;
+                        $newPatientLog->date       = date('Y-m-d');
+                        $newPatientLog->hn         = $data->HN;
+                        $newPatientLog->text       = 'สร้างรายการ Check UP : ' . $text;
+                        $newPatientLog->user       = 'service';
+                        $newPatientLog->save();
 
                         if ($code == 'b12_vitalsign') {
-                            $this->setLog($patient, 'ลงทะเบียนคิวที่ : วัดความดัน');
+                            $newPatientLog             = new Patientlogs;
+                            $newPatientLog->patient_id = $patient->id;
+                            $newPatientLog->date       = date('Y-m-d');
+                            $newPatientLog->hn         = $data->HN;
+                            $newPatientLog->text       = 'ลงทะเบียนคิวที่ : วัดความดัน';
+                            $newPatientLog->user       = 'service';
+                            $newPatientLog->save();
                         }
                     }
                 }
@@ -153,57 +164,5 @@ class ProcessCreateTask implements ShouldQueue
             ProcessCreateTask::dispatch()->delay(60 * 30);
         }
 
-    }
-
-    private function setLog($patient, $text)
-    {
-        $newPatientLog             = new Patientlogs;
-        $newPatientLog->patient_id = $patient->id;
-        $newPatientLog->date       = date('Y-m-d');
-        $newPatientLog->hn         = $patient->hn;
-        $newPatientLog->text       = $text;
-        $newPatientLog->user       = 'service';
-        $newPatientLog->save();
-    }
-
-    public function failed(?Throwable $exception): void
-    {
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL            => 'https://api.line.me/v2/bot/message/push',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING       => '',
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST  => 'POST',
-            CURLOPT_POSTFIELDS     => '{
-            "to": "U3d7ba4f0386437906a68612c1cce5eba",
-            "messages":[
-                {
-                    "type":"text",
-                    "text":"Services Error",
-                    "quickReply": {
-                        "items": [
-                        {
-                            "type": "action",
-                            "action": {
-                                "type": "uri",
-                                "label": "ServicesPages!!!",
-                                "uri": "https://pr9webhub.praram9.com/checkup/serviceStart"
-                            }
-                        }
-                        ]
-                    }
-                }
-            ]
-        }',
-            CURLOPT_HTTPHEADER     => [
-                'Authorization: Bearer ' . env('LINE_Token') . '', 'Content-Type: application/json',
-            ],
-        ]);
-        $response = curl_exec($curl);
-        curl_close($curl);
     }
 }

@@ -1,33 +1,23 @@
 <?php
-
 namespace App\Jobs;
 
 use App\Models\Patient;
 use App\Models\Patientlogs;
 use App\Models\Patienttask;
+use DB;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
-use DB;
 
 class ProcessClearTask implements ShouldQueue
 {
     use Queueable;
     public $tries = 5;
-    
-    public function backoff(): array
-    {
-        return [30, 60, 600];
-    }
 
-    public function middleware(): array
-    {
-        return [new WithoutOverlapping(date('Y-m-d'))];
-    }
+    public $backoff = 60;
 
     public function uniqueId(): string
     {
-        return 'clearTask';
+        return 'clear_task_' . now()->timestamp;
     }
 
     public function __construct()
@@ -41,69 +31,70 @@ class ProcessClearTask implements ShouldQueue
             ->whereNull('success')
             ->get();
 
-        foreach($tasks as $task){
+        $ssbVitalSigns = DB::connection('SSB')
+            ->table("HNOPD_VITALSIGN")
+            ->whereDate('VisitDate', date('Y-m-d'))
+            ->get();
+
+        foreach ($tasks as $task) {
             $success = false;
-            $text = null;
-            if($task->code == 'b12_vitalsign'){
-                $getVS = DB::connection('SSB')
-                    ->table("HNOPD_VITALSIGN")
-                    ->whereDate('VisitDate', date('Y-m-d'))
+            $text    = null;
+            if ($task->code == 'b12_vitalsign') {
+                $listVitalSign = collect($ssbVitalSigns)
                     ->where('VN', $task->vn)
                     ->first();
 
-                if($getVS !== null){
+                if ($listVitalSign !== null) {
                     $success = true;
-                    $text = 'Vital Sign';
+                    $text    = 'Vital Sign';
                 }
-            } 
-            else if($task->code == 'b12_lab'){
-                $blood = DB::connection('SSB')
+            } else if ($task->code == 'b12_lab') {
+                $listLab = DB::connection('SSB')
                     ->table('HNLABREQ_HEADER')
                     ->where('RequestNo', $task->memo1)
+                    ->select('SpecimenReceiveDateTime')
                     ->first();
 
-                if($blood !== null && $blood->SpecimenReceiveDateTime !== null){
+                if ($listLab !== null && $listLab->SpecimenReceiveDateTime !== null) {
                     $success = true;
-                    $text = 'Lab';
+                    $text    = 'Lab';
                 }
             }
 
-            if($success){
-                $task->type = 'success';
+            if ($success) {
+                $task->type    = 'success';
                 $task->success = date('Y-m-d H:i:s');
                 $task->save();
-    
-                $newPatientLog = new Patientlogs;
-                $newPatientLog->patient_id = $task->patient->id;
-                $newPatientLog->date = date('Y-m-d');
-                $newPatientLog->hn = $task->patient->hn;
-                $newPatientLog->text = 'สำเร็จรายการที่ : '. $text;
-                $newPatientLog->user = 'service';
-                $newPatientLog->save();
-    
-                if($task->code == 'b12_vitalsign'){
+                $this->setLog($task->patient, 'สำเร็จรายการที่ : ' . $text);
+
+                if ($task->code == 'b12_vitalsign') {
                     $taskLab = Patienttask::whereDate('date', date('Y-m-d'))
                         ->where('vn', $task->vn)
                         ->where('code', 'b12_lab')
                         ->whereNull('assign')
                         ->first();
-        
-                    if($taskLab !== null){
+
+                    if ($taskLab !== null) {
                         $taskLab->assign = date('Y-m-d H:i:s');
                         $taskLab->save();
-        
-                        $newPatientLog = new Patientlogs;
-                        $newPatientLog->patient_id = $task->patient->id;
-                        $newPatientLog->date = date('Y-m-d');
-                        $newPatientLog->hn = $task->patient->hn;
-                        $newPatientLog->text = 'ลงทะเบียนคิวที่ : Lab';
-                        $newPatientLog->user = 'service';
-                        $newPatientLog->save();
+
+                        $this->setLog($task->patient, 'ลงทะเบียนคิวที่ : Lab');
                     }
                 }
             }
         }
 
-        ProcessClearTask::dispatch()->delay(300);
+        ProcessClearTask::dispatch()->onQueue('clearing')->delay(300);
+    }
+
+    private function setLog($patient, $text)
+    {
+        $newPatientLog             = new Patientlogs;
+        $newPatientLog->patient_id = $patient->id;
+        $newPatientLog->date       = date('Y-m-d');
+        $newPatientLog->hn         = $patient->hn;
+        $newPatientLog->text       = $text;
+        $newPatientLog->user       = 'service';
+        $newPatientLog->save();
     }
 }
