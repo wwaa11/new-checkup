@@ -56,13 +56,12 @@ class ServiceController extends Controller
     public function dispatchCreate()
     {
         ProcessCreateTask::dispatch();
-        // ProcessCreateTaskXray::dispatch();
 
         return response()->json('success', 200);
     }
     public function dispatchClear()
     {
-        ProcessClearTask::dispatch()->onQueue('clearing');
+        ProcessClearTask::dispatch();
 
         return response()->json('success', 200);
     }

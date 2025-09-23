@@ -84,7 +84,7 @@ class ProcessClearTask implements ShouldQueue
             }
         }
 
-        ProcessClearTask::dispatch()->onQueue('clearing')->delay(300);
+        ProcessClearTask::dispatch()->delay(300);
     }
 
     private function setLog($patient, $text)
