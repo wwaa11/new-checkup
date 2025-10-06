@@ -5,24 +5,18 @@ use App\Models\Patient;
 use App\Models\Patientlogs;
 use App\Models\Patienttask;
 use DB;
+use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
-class ProcessCreateTask implements ShouldQueue
+class ProcessCreateTask implements ShouldQueue, ShouldBeUniqueUntilProcessing
 {
     use Queueable;
-    public $tries   = 50;
-    public $backoff = 60;
 
     public function uniqueId(): string
     {
-        return 'checkup_task_' . now()->timestamp;
-    }
-
-    public function __construct()
-    {
-
+        return 'generate-task';
     }
 
     public function handle(): void

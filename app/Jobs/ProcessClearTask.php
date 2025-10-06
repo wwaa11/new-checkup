@@ -1,28 +1,20 @@
 <?php
 namespace App\Jobs;
 
-use App\Models\Patient;
 use App\Models\Patientlogs;
 use App\Models\Patienttask;
 use DB;
+use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-class ProcessClearTask implements ShouldQueue
+class ProcessClearTask implements ShouldQueue, ShouldBeUniqueUntilProcessing
 {
     use Queueable;
-    public $tries = 5;
-
-    public $backoff = 60;
 
     public function uniqueId(): string
     {
-        return 'clear_task_' . now()->timestamp;
-    }
-
-    public function __construct()
-    {
-
+        return 'clear-task';
     }
 
     public function handle(): void

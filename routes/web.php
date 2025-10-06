@@ -16,6 +16,7 @@ Route::post('/dispatchCreate', [ServiceController::class, 'dispatchCreate']);
 Route::post('/dispatchClear', [ServiceController::class, 'dispatchClear']);
 Route::post('/dispatchDelete', [ServiceController::class, 'dispatchDelete']);
 Route::post('/LineMessageCheck', [ServiceController::class, 'LineMessageCheck']);
+Route::post('/restart-service', [ServiceController::class, 'restartService']);
 
 // Auth
 Route::get('/auth', [StationController::class, 'Auth']);
