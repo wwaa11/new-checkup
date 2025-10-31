@@ -220,7 +220,7 @@ class StationController extends Controller
                 $newPatientLog->date       = date('Y-m-d');
                 $newPatientLog->hn         = $ssbInfo->HN;
                 $newPatientLog->text       = 'ลงทะเบียนข้อมูลผู้ป่วยใหม่ นอกเหนือจาก NewUI';
-                $newPatientLog->user       = Auth::user()->userid;
+                $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
                 $newPatientLog->save();
             } else {
                 return response()->json(['status' => 'unsuccess', 'text' => 'VN not found!'], 200);
@@ -249,7 +249,7 @@ class StationController extends Controller
         $newPatientLog->date       = date('Y-m-d');
         $newPatientLog->hn         = $patient->hn;
         $newPatientLog->text       = 'ลงทะเบียนคิวที่ : ' . $station->name;
-        $newPatientLog->user       = Auth::user()->userid;
+        $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
         $newPatientLog->save();
 
         return response()->json(['status' => 'success', 'patient' => $patient], 200);
@@ -348,7 +348,7 @@ class StationController extends Controller
         $newPatientLog->date       = date('Y-m-d');
         $newPatientLog->hn         = $changeTask->hn;
         $newPatientLog->text       = 'SSP Change';
-        $newPatientLog->user       = Auth::user()->userid;
+        $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
         $newPatientLog->save();
 
         return response()->json(['status' => 'success', 'tasks' => $changeTask], 200);
@@ -385,7 +385,7 @@ class StationController extends Controller
                 $newPatientLog->date       = date('Y-m-d');
                 $newPatientLog->hn         = $now_task->patient->hn;
                 $newPatientLog->text       = 'ลบคิวออกจาก Call : ' . $substation->name;
-                $newPatientLog->user       = Auth::user()->userid;
+                $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
                 $newPatientLog->save();
             } else {
                 $now_task->type   = 'wait';
@@ -399,7 +399,7 @@ class StationController extends Controller
                 $newPatientLog->date       = date('Y-m-d');
                 $newPatientLog->hn         = $now_task->patient->hn;
                 $newPatientLog->text       = 'ปรับคิวไปยัง Waiting ที่ : ' . $substation->name;
-                $newPatientLog->user       = Auth::user()->userid;
+                $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
                 $newPatientLog->save();
             }
         }
@@ -433,7 +433,7 @@ class StationController extends Controller
             $newPatientLog->date       = date('Y-m-d');
             $newPatientLog->hn         = $task->patient->hn;
             $newPatientLog->text       = 'เรียกคิวที่ : ' . $substation->name;
-            $newPatientLog->user       = Auth::user()->userid;
+            $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
             $newPatientLog->save();
 
             $this->sendNotiLine($task->patient->hn, $task->vn, $substation->name, $task->patient->name);
@@ -459,7 +459,7 @@ class StationController extends Controller
         $newPatientLog->date       = date('Y-m-d');
         $newPatientLog->hn         = $task->patient->hn;
         $newPatientLog->text       = 'เรียกคิวที่ : ' . $substation->name;
-        $newPatientLog->user       = Auth::user()->userid;
+        $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
         $newPatientLog->save();
 
         $this->sendNotiLine($task->patient->hn, $task->vn, $substation->name, $task->patient->name);
@@ -490,7 +490,7 @@ class StationController extends Controller
         $newPatientLog->date       = date('Y-m-d');
         $newPatientLog->hn         = $task->patient->hn;
         $newPatientLog->text       = 'ปรับคิวไปยัง Waiting ที่ : ' . $substation->station->name;
-        $newPatientLog->user       = Auth::user()->userid;
+        $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
         $newPatientLog->save();
 
         return response()->json(['status' => 'success'], 200);
@@ -515,7 +515,7 @@ class StationController extends Controller
         $newPatientLog->date       = date('Y-m-d');
         $newPatientLog->hn         = $task->patient->hn;
         $newPatientLog->text       = 'สำเร็จรายการที่ : ' . $substation->name;
-        $newPatientLog->user       = Auth::user()->userid;
+        $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
         $newPatientLog->save();
 
         if ($substation->station->code == 'b12_vitalsign') {
@@ -533,7 +533,7 @@ class StationController extends Controller
                 $newPatientLog->date       = date('Y-m-d');
                 $newPatientLog->hn         = $task->patient->hn;
                 $newPatientLog->text       = 'ลงทะเบียนคิวที่ : ห้องเจาะเลือด';
-                $newPatientLog->user       = Auth::user()->userid;
+                $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
                 $newPatientLog->save();
             }
         }
@@ -557,7 +557,7 @@ class StationController extends Controller
         $newPatientLog->date       = date('Y-m-d');
         $newPatientLog->hn         = $task->patient->hn;
         $newPatientLog->text       = 'ลบคิวที่ : ' . $substation->name;
-        $newPatientLog->user       = Auth::user()->userid;
+        $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
         $newPatientLog->save();
 
         if ($substation->station->code == 'b12_vitalsign') {
@@ -575,7 +575,7 @@ class StationController extends Controller
                 $newPatientLog->date       = date('Y-m-d');
                 $newPatientLog->hn         = $task->patient->hn;
                 $newPatientLog->text       = 'ลงทะเบียนคิวที่ : ' . $substation->name;
-                $newPatientLog->user       = Auth::user()->userid;
+                $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
                 $newPatientLog->save();
             }
         }
@@ -626,7 +626,7 @@ class StationController extends Controller
             $newPatientLog->date       = date('Y-m-d');
             $newPatientLog->hn         = $task->patient->hn;
             $newPatientLog->text       = 'สำเร็จรายการที่ : ' . $station->name;
-            $newPatientLog->user       = Auth::user()->userid;
+            $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
             $newPatientLog->save();
 
             if ($substation->station->code == 'b12_vitalsign') {
@@ -644,7 +644,7 @@ class StationController extends Controller
                     $newPatientLog->date       = date('Y-m-d');
                     $newPatientLog->hn         = $task->patient->hn;
                     $newPatientLog->text       = 'ลงทะเบียนคิวที่ : Lab';
-                    $newPatientLog->user       = Auth::user()->userid;
+                    $newPatientLog->user       = Auth::user()->userid ?? 'auth error';
                     $newPatientLog->save();
                 }
             }
@@ -692,6 +692,31 @@ class StationController extends Controller
         $stationid = json_encode($stationid);
 
         return view('station.display')->with(compact('stations', 'stationid'));
+    }
+    public function displayPageJson(Request $request)
+    {
+        $stationName = $request->query('station');
+
+        switch ($stationName) {
+            case 'vitalsign':
+                $code = ['b12_vitalsign'];
+                break;
+            case 'lab':
+                $code = ['b12_lab'];
+                break;
+            default:
+                $code = [];
+                break;
+        }
+
+        $stations   = Station::whereIn('code', $code)->with('substations')->get();
+        $stationIds = $stations->pluck('id')->values();
+
+        return response()->json([
+            'status'    => 'success',
+            'stations'  => $stations,
+            'stationid' => $stationIds,
+        ], 200);
     }
     public function displayList(Request $request)
     {

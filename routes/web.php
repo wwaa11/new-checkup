@@ -18,6 +18,8 @@ Route::post('/dispatchDelete', [ServiceController::class, 'dispatchDelete']);
 Route::post('/LineMessageCheck', [ServiceController::class, 'LineMessageCheck']);
 Route::post('/restart-service', [ServiceController::class, 'restartService']);
 
+Route::get('/station/displaylist', [StationController::class, 'displayPageJson']);
+
 // Auth
 Route::get('/auth', [StationController::class, 'Auth']);
 Route::post('/authcheck', [StationController::class, 'AuthCheck']);
@@ -27,8 +29,10 @@ Route::get('/sms/{hn}', [PatientController::class, 'smsRequest']);
 Route::post('/requestNumber', [PatientController::class, 'requestNumber']);
 // Display
 Route::get('/display/{station}', [StationController::class, 'displayPage']);
-Route::post('/display/list', [StationController::class, 'displayList']);
-Route::post('/display/updateCall', [StationController::class, 'updateCall']);
+Route::post('/display/list', [StationController::class, 'displayList'])
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
+Route::post('/display/updateCall', [StationController::class, 'updateCall'])
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
 
 // VitalSign Lab
 Route::middleware([pr9Auth::class])->group(function () {
