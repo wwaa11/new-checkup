@@ -7,7 +7,7 @@
         <div class="flex gap-3 px-6">
             <div class="flex-shrink p-3 pt-4 text-2xl font-bold text-gray-600">{{ $substation->name }}</div>
             <div class="flex flex-grow gap-3">
-                <button class="w-32 rounded border bg-[#008387] py-3 text-white" type="button" onclick="CallFn()">
+                <button class="call-btn w-32 rounded border bg-[#008387] py-3 text-white" type="button" onclick="CallFn()">
                     Call New Patient
                 </button>
                 <div class="flex-grow bg-gray-100 p-3 pt-4 text-2xl font-bold shadow">
@@ -24,13 +24,13 @@
                     @endif
                 </div>
                 @if ($patient->enabled)
-                    <button class="w-32 rounded border bg-pink-600 py-3 text-white" type="button" onclick="CallSoundFn('{{ $patient->vn }}')">
+                    <button class="call-btn w-32 rounded border bg-pink-600 py-3 text-white" type="button" onclick="CallSoundFn('{{ $patient->vn }}')">
                         Call Sound
                     </button>
-                    <button class="w-32 rounded border bg-amber-500 py-3 text-white" type="button" onclick="HoldFn('{{ $patient->vn }}')">
+                    <button class="hold-btn w-32 rounded border bg-amber-500 py-3 text-white" type="button" onclick="HoldFn('{{ $patient->vn }}')">
                         Hold
                     </button>
-                    <button class="w-32 rounded border bg-green-600 py-3 text-white" type="button" onclick="SuccessFn('{{ $patient->vn }}')">
+                    <button class="success-btn w-32 rounded border bg-green-600 py-3 text-white" type="button" onclick="SuccessFn('{{ $patient->vn }}')">
                         Success
                     </button>
                 @endif
@@ -163,15 +163,15 @@
                     setHtml = setHtml + '</div>'
                     setHtml = setHtml + '<div class="p-2 gap-2 text-center flex">';
                     setHtml = setHtml +
-                        '<button class="bg-[#008387] w-32 text-white p-3 flex-grow rounded" type="button" onclick="CallFn(\'' +
+                        '<button class="bg-[#008387] w-32 text-white p-3 flex-grow rounded call-btn" type="button" onclick="CallFn(\'' +
                         val.vn + '\')">Call</button>'
                     if (type == 'process') {
                         setHtml = setHtml +
-                            '<button class="bg-amber-500 w-32 text-white flex-grow rounded" type="button" onclick="HoldFn(\'' +
+                            '<button class="bg-amber-500 w-32 text-white flex-grow rounded hold-btn" type="button" onclick="HoldFn(\'' +
                             val.vn + '\')">Hold</button>'
                     } else if (type == 'wait') {
                         setHtml = setHtml +
-                            '<button class="bg-red-600 w-32 text-white p-3 flex-grow rounded" type="button" onclick="DeleteFn(\'' +
+                            '<button class="bg-red-600 w-32 text-white p-3 flex-grow rounded delete-btn" type="button" onclick="DeleteFn(\'' +
                             val.vn + '\')">Delete</button>'
                     }
                     setHtml = setHtml + '</div>';
@@ -203,7 +203,7 @@
                     setHtml = setHtml + '<div class="p-2 ">' + val.name + '</div>'
                     if (val.memo5 == 1) {
                         setHtml = setHtml +
-                            '<button class="p-2 m-2 rounded border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white" type="button" onclick="changeSSP(\'' +
+                            '<button class="p-2 m-2 rounded border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white ssp-btn" type="button" onclick="changeSSP(\'' +
                             val.vn + '\')">SSP</button>'
                     } else {
                         setHtml = setHtml +
@@ -231,6 +231,11 @@
             })
 
             if (alert.isConfirmed) {
+                $(`.ssp-btn`).prop('disabled', true);
+                $('.ssp-btn').text('Processing...');
+                $('.ssp-btn').removeClass('border-blue-600');
+                $('.ssp-btn').css('background-color', 'gray');
+
                 const formData = new FormData();
                 formData.append('vn', vn);
                 await axios.post("{{ env("APP_URL") }}/station/changeSSP", formData).then((res) => {
@@ -272,6 +277,11 @@
             })
 
             if (alert.isConfirmed) {
+                $(`.success-btn`).prop('disabled', true);
+                $('.success-btn').text('Processing...');
+                $('.success-btn').removeClass('bg-green-600');
+                $('.success-btn').css('background-color', 'gray');
+
                 const formData = new FormData();
                 formData.append('substation_id', '{{ $substation->id }}');
                 formData.append('vn', vn);
@@ -282,6 +292,12 @@
         }
 
         async function CallFn(vn) {
+            $(`.call-btn`).prop('disabled', true);
+            $('.call-btn').text('Calling...');
+            $('.call-btn').removeClass('bg-[#008387]');
+            $('.call-btn').css('background-color', 'gray');
+
+            console.log('CallFn vn', vn);
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
             formData.append('vn', vn);
@@ -291,11 +307,26 @@
         }
 
         async function CallSoundFn(vn) {
+            $(`.call-btn`).prop('disabled', true);
+            $('.call-btn').text('Calling...');
+            $('.call-btn').removeClass('bg-[#008387]');
+            $('.call-btn').css('background-color', 'gray');
+
             const formData = new FormData();
             formData.append('substation_id', '{{ $substation->id }}');
             formData.append('vn', vn);
             await axios.post("{{ env("APP_URL") }}/station/callsound", formData).then((res) => {
-                alert(res)
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Call Sound Sent',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+
+                $(`.call-btn`).prop('disabled', false);
+                $('.call-btn').text('Call Sound');
+                $('.call-btn').addClass('bg-[#008387]');
+                $('.call-btn').css('background-color', '');
             })
         }
 
@@ -311,6 +342,11 @@
             })
 
             if (reason !== '') {
+                $(`.hold-btn`).prop('disabled', true);
+                $('.hold-btn').text('Holding...');
+                $('.hold-btn').removeClass('bg-amber-500');
+                $('.hold-btn').css('background-color', 'gray');
+
                 const formData = new FormData();
                 formData.append('substation_id', '{{ $substation->id }}');
                 formData.append('vn', vn);
@@ -338,6 +374,11 @@
             })
 
             if (alert.isConfirmed) {
+                $(`.delete-btn`).prop('disabled', true);
+                $('.delete-btn').text('Deleting...');
+                $('.delete-btn').removeClass('bg-red-600');
+                $('.delete-btn').css('background-color', 'gray');
+
                 const formData = new FormData();
                 formData.append('substation_id', '{{ $substation->id }}');
                 formData.append('vn', vn);

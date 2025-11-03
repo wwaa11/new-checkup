@@ -117,10 +117,10 @@ class StationController extends Controller
             $error_msg = curl_error($curl);
             Log::channel('line')->error("cURL Error for HN: {$hn}, VN: {$vn}, Location: {$location} - Error: {$error_msg}");
         } elseif ($httpcode >= 400) { // Check for HTTP error codes (4xx or 5xx)
-            Log::channel('line')->error("API Error for HN: {$hn}, VN: {$vn}, Location: {$location} - HTTP Status: {$httpcode}, Response: {$response}");
+            Log::channel('line')->error("Error for HN: {$hn}, VN: {$vn}, Location: {$location} - HTTP Status: {$httpcode}, Response: {$response}");
         } else {
             // Log success or non-error responses
-            Log::channel('line')->info("Success/Info for HN: {$hn}, VN: {$vn}, Location: {$location} - Response: {$response}");
+            Log::channel('line')->info("Info for HN: {$hn}, VN: {$vn}, Location: {$location} - Response: {$response}");
         }
         curl_close($curl);
     }
@@ -143,6 +143,11 @@ class StationController extends Controller
     public function Substation($id)
     {
         $substation = Substation::find($id);
+        if ($substation == null) {
+
+            return 'not found substation';
+        }
+
         if ($substation->now !== null) {
             $patient = Patient::where('date', date('Y-m-d'))
                 ->where('vn', $substation->now)

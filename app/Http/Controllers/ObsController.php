@@ -80,10 +80,10 @@ class ObsController extends Controller
             $error_msg = curl_error($curl);
             Log::channel('line')->error("cURL Error for HN: {$hn}, VN: {$vn}, Location: {$location} - Error: {$error_msg}");
         } elseif ($httpcode >= 400) { // Check for HTTP error codes (4xx or 5xx)
-            Log::channel('line')->error("API Error for HN: {$hn}, VN: {$vn}, Location: {$location} - HTTP Status: {$httpcode}, Response: {$response}");
+            Log::channel('line')->error("Error for HN: {$hn}, VN: {$vn}, Location: {$location} - HTTP Status: {$httpcode}, Response: {$response}");
         } else {
             // Log success or non-error responses
-            Log::channel('line')->info("Success/Info for HN: {$hn}, VN: {$vn}, Location: {$location} - Response: {$response}");
+            Log::channel('line')->info("Info for HN: {$hn}, VN: {$vn}, Location: {$location} - Response: {$response}");
         }
         curl_close($curl);
     }
