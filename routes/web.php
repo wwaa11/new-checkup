@@ -29,10 +29,8 @@ Route::get('/sms/{hn}', [PatientController::class, 'smsRequest']);
 Route::post('/requestNumber', [PatientController::class, 'requestNumber']);
 // Display
 Route::get('/display/{station}', [StationController::class, 'displayPage']);
-Route::post('/display/list', [StationController::class, 'displayList'])
-    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
-Route::post('/display/updateCall', [StationController::class, 'updateCall'])
-    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
+Route::post('/display/list', [StationController::class, 'displayList'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
+Route::post('/display/updateCall', [StationController::class, 'updateCall'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
 
 // VitalSign Lab
 Route::middleware([pr9Auth::class])->group(function () {

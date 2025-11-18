@@ -29,7 +29,7 @@ class ProcessCreateTask implements ShouldQueue, ShouldBeUniqueUntilProcessing
                 ->whereDate('HIS_CHECKUP_STATION_DETAIL.Visitdate', date('Y-m-d'))
                 ->where('HIS_CHKUP_HEADER.Clinic', '1800')
                 ->where('HIS_CHKUP_HEADER.ComputerLocation', 'LIKE', 'B12%')
-                ->whereIn('HIS_CHECKUP_STATION_DETAIL.StationCode', ['01', '011'])
+                ->whereIn('HIS_CHECKUP_STATION_DETAIL.StationCode', ['01', '02', '011'])
                 ->select(
                     'HIS_CHECKUP_STATION_DETAIL.Visitdate',
                     'HIS_CHECKUP_STATION_DETAIL.HN',
@@ -74,6 +74,11 @@ class ProcessCreateTask implements ShouldQueue, ShouldBeUniqueUntilProcessing
                         $text       = 'Lab';
                         break;
                     case '02':
+                        $checkValid = true;
+                        $code       = 'b12_ekg';
+                        $text       = 'EKG';
+                        break;
+                    case '03':
                         $checkValid = true;
                         $code       = 'b12_abi';
                         $text       = 'ABI';
